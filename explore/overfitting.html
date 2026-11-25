@@ -164,7 +164,7 @@ footer{color:var(--muted);font-size:14px}
     <details><summary>数学：机器具体在算什么</summary>
       <p>模型是一条 d 次多项式曲线，机器要找出一组系数 w，让它在练习题上的平方误差之和最小（最小二乘法）：</p>
       <div class="math">ŷ(x) = w₀ + w₁·φ₁(x) + … + w_d·φ_d(x)　　min_w Σᵢ ( yᵢ − ŷ(xᵢ) )²</div>
-      <p>为了数值稳定，φ 用的是勒让德多项式（和 1, x, x², … 张成同一组曲线，只是计算更稳）。当练习点比系数还少时，方程有无数个解，程序加了一个极小的正则项 λ = 10⁻⁷ 来选出其中一个。练习题误差和考题误差都按 MSE 计算。</p>
+      <p>为了数值稳定，φ 用的是勒让德多项式（和 1, x, x², … 张成同一组曲线，只是计算更稳）。当次数超过点数减一（系数比参与拟合的点还多）时，方程有无数个解，每一个都能穿过所有点；程序靠一个极小的惩罚项 λ = 10⁻⁷（代码里的 LAMBDA）选出勒让德多项式系数平方和最小的那条曲线。它和“最平缓”大致一致，但不完全相同。练习题误差和考题误差都按 MSE 计算。</p>
     </details>
     <details><summary>数据从哪里来</summary>
       <p>数据由程序生成：真实规律是 y = sin(2.4x) + 0.3x，x 在 −1 到 1 之间随机取，每个点再加上正态分布噪声（标准差就是“噪声大小”）。考题固定 40 个，和练习题来自同一个规律，但互不重复。</p>
@@ -242,10 +242,25 @@ function drawErr(E){const w=errSvg.clientWidth,h=errSvg.clientHeight;if(!w)retur
   ${line('tr','var(--sage)')}${line('te','var(--rose)')}`}
 
 const names={down:'一直变小',u:'先变小，后变大',flat:'基本不变'};
-function insight(E){if(!st.guess)return;const te=E.map(e=>e.te),best=te.indexOf(Math.min(...te)),bd=best+1;
-  const pattern=te[MAXD-1]>1.5*te[best]&&bd<MAXD?'u':te[0]>1.3*te[best]?'down':'flat';
-  let s=`你猜的是“${names[st.guess]}”。在你眼前这组数据里，练习题误差从 ${fmt(E[0].tr)} 降到 ${fmt(E[MAXD-1].tr)}；考题误差在次数 <b>${bd}</b> 时最低（${fmt(te[best])}），到次数 12 时是 ${fmt(te[MAXD-1])}，整体更像“${names[pattern]}”。`;
-  s+=pattern===st.guess?' 和你的猜测一致。':' 和你的猜测不太一样，可以想想是哪里出乎意料。';
+// 判断考题误差随次数的形状。te：次数 1..n 的考题误差；返回 pattern 和最低、最高点的下标（从 0 开始）
+function shapeOf(te){const n=te.length,mn=Math.min(...te),mx=Math.max(...te),best=te.indexOf(mn),worst=te.indexOf(mx);
+  let pattern='other';
+  if(mx/mn<1.5)pattern='flat';
+  else if(best>=n-2&&te[0]>1.5*mn)pattern='down';
+  else if(best>0&&best<n-2&&te[0]>1.3*mn&&te[n-1]>1.5*mn)pattern='u';
+  return{pattern,best,worst}}
+function insight(E){if(!st.guess)return;const te=E.map(e=>e.te),{pattern,best,worst}=shapeOf(te),bd=best+1,wd=worst+1;
+  let s=`你猜的是“${names[st.guess]}”。在你眼前这组数据里，练习题误差从 ${fmt(E[0].tr)} 降到 ${fmt(E[MAXD-1].tr)}；考题误差在次数 <b>${bd}</b> 时最低（${fmt(te[best])}），在次数 <b>${wd}</b> 时最高（${fmt(te[worst])}），到次数 12 时是 ${fmt(te[MAXD-1])}。`;
+  if(pattern==='other')s+=' 这条曲线和三个选项都不太像，可以看看它是在哪里拐弯的。';
+  else{s+=`整体更像“${names[pattern]}”。`;s+=pattern===st.guess?' 和你的猜测一致。':' 和你的猜测不太一样，可以想想是哪里出乎意料。'}
+  // 提示一：考题超出练习题覆盖的 x 范围
+  const xs=a=>a.map(p=>p.x),trX=xs(st.train),teX=xs(st.test);
+  if(trX.length&&teX.length&&(Math.min(...teX)<Math.min(...trX)-.15||Math.max(...teX)>Math.max(...trX)+.15))
+    s+=' 有些考题落在练习题没覆盖到的区域，曲线只能外推，越灵活的曲线外推得越离谱。';
+  // 提示二：插值阈值附近的误差尖峰（m 为实际参与拟合的点数）
+  const m=trainSet().length;
+  if(m<=MAXD&&Math.abs(wd-(m-1))<=1)
+    s+=` 次数达到 ${m-1}（练习题数 − 1）时，曲线刚好能穿过所有练习点，会剧烈扭动；次数更高时，程序会在无数条穿过所有点的曲线里挑系数最小的一条（这样的曲线通常也比较平缓），误差可能反而回落。这和“双重下降”现象有关。`;
   s+=' 试试减少练习题、加大噪声，或者换一组数据，形状会怎么变？';
   if(st.cheat)s+=' <b>注意：你现在开着“偷看考题”，以上考题误差不可信。</b>';
   $('insight').innerHTML=s}
