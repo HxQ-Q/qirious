@@ -12,7 +12,7 @@
    IDEA: 一张作者名片 + 作品陈列
    PICTURE: 水彩晕染的头像与名字
    COLOUR and TYPE: 与全站一致
-   LAYOUT: 名片 → 我的实验 → 名字的由来 → 接下来想弄懂的 */
+   LAYOUT: 名片 → 我的探索 → 名字的由来 → 接下来想弄懂的 */
 :root{color-scheme:light dark;
 --bg:light-dark(#F7F3EC,#1F1D1B);--paper:light-dark(#FFFDF9,#292724);--ink:light-dark(#2F2C28,#ECE5D8);
 --muted:light-dark(#716B62,#A9A195);--line:light-dark(#E3DCD0,#403C37);
@@ -47,7 +47,6 @@ h2{font:700 clamp(20px,2vw,24px)/1.25 "Noto Serif SC",serif;margin:0 0 .6em}
 .ava span{position:absolute;inset:0;display:grid;place-items:center;font:700 44px "Noto Serif SC",serif;color:var(--ink)}
 .handle{font:600 15px "Nunito",sans-serif;color:var(--muted)}
 .bio{max-width:58ch;margin:.4em 0 0}
-.draft{font-size:12.5px;color:var(--muted)}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:14px}
 .wk{display:flex;flex-direction:column;gap:6px;padding:16px;border-radius:10px;border:.5px solid var(--line);background:var(--paper);color:var(--ink);text-decoration:none;min-height:150px}
 .wk.plan{background:transparent;border-style:dashed}
@@ -73,8 +72,7 @@ h2{font-weight:600;border-top:.5px solid var(--line);padding-top:12px}
       <div>
         <div class="handle">Qirious 的主人</div>
         <h1 style="margin:.1em 0 .1em">淇思工坊</h1>
-        <p class="bio">一个学数学和金融的学生。喜欢把弄不懂的问题拆开，做成可以亲手试一试的小实验，再把它们一个个连起来。</p>
-        <div class="draft">简介是草稿，之后换成你自己的话</div>
+        <p class="bio">一个学数学与金融的学生，也是一个收集“芝士”的人。在这里把感兴趣的知识一块块切开、看清楚，再拼成一张属于自己的知识网。</p>
       </div>
     </div>
     <div class="stats" id="stats" style="margin-top:22px"></div>
@@ -82,7 +80,7 @@ h2{font-weight:600;border-top:.5px solid var(--line);padding-top:12px}
 </header>
 <main class="band" style="padding-top:0">
   <div class="wrap">
-    <h2>我的实验</h2>
+    <h2>我的探索</h2>
     <div class="cards" id="cards"></div>
   </div>
 </main>
@@ -107,7 +105,7 @@ h2{font-weight:600;border-top:.5px solid var(--line);padding-top:12px}
 {
 const {TOPICS,PAGES}=window.QIRIOUS,$=id=>document.getElementById(id);
 const done=PAGES.filter(p=>p.status==='done'),plan=PAGES.filter(p=>p.status==='plan');
-$('stats').innerHTML=`<div><b>${done.length}</b>完成的实验</div><div><b>${plan.length}</b>计划中</div><div><b>${new Set(PAGES.flatMap(p=>p.topics)).size}</b>个主题</div>`;
+$('stats').innerHTML=`<div><b>${done.length}</b>已完成</div><div><b>${plan.length}</b>计划中</div><div><b>${new Set(PAGES.flatMap(p=>p.topics)).size}</b>个主题</div>`;
 $('cards').innerHTML=[...done,...plan].map(p=>`<a class="wk ${p.status}" href="${p.url||'index.html#'+p.id}"><span class="st">${p.status==='done'?'已完成':'计划中'}</span><b>${p.q}</b><span class="dots">${p.topics.map(t=>`<i style="background:${TOPICS[t].c}" title="${TOPICS[t].name}"></i>`).join('')}</span><span class="en">${p.en}</span></a>`).join('');
 $('next').innerHTML=plan.map(p=>`<li><a href="index.html#${p.id}">${p.q}</a></li>`).join('');
 }

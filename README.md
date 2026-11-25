@@ -12,7 +12,7 @@ Qirious 是一个个人学习网站，用来探索自己感兴趣的领域和知
 
 - 纯静态网站（HTML / CSS / JavaScript），通过 GitHub Pages 发布
 - `pages.js`：所有页面的档案，首页的知识地图和目录由它自动生成
-- `experiments/`：各个内容页面
+- `explore/`：各个内容页面
 - `CLAUDE.md`：项目约定与设计规范
 
 ## 名字的由来

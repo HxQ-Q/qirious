@@ -8,10 +8,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700&family=Noto+Sans+SC:wght@400;500&family=Nunito:wght@400;500;600;700&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
 <style>
-/* VOICE: 安静、个人、带点好奇心的个人实验网站 Qirious
+/* VOICE: 安静、个人、带点好奇心的个人学习网站 Qirious
    IDEA: 手帐的扉页：一张用彩铅连起来的知识星图，旁边是目录
    PICTURE: 手绘知识地图，节点是水彩晕染的圆点，连线是铅笔线
-   COLOUR and TYPE: 与实验页相同的莫兰迪纸色与三种主色，每个主题一种颜色；Noto Serif SC / Noto Sans SC / Caveat
+   COLOUR and TYPE: 与内容页相同的莫兰迪纸色与三种主色，每个主题一种颜色；Noto Serif SC / Noto Sans SC / Caveat
    LAYOUT: 标题 → 地图 + 选中卡片 → 主题筛选与目录 → 关于 */
 :root{color-scheme:light dark;
 --bg:light-dark(#F7F3EC,#1F1D1B);--paper:light-dark(#FFFDF9,#292724);--ink:light-dark(#2F2C28,#ECE5D8);
@@ -103,14 +103,14 @@ footer{color:var(--muted);font-size:14px}
     <div class="top">
       <div>
         
-        <h1>把想弄懂的问题，<br>变成可以动手的小实验</h1>
-        <p class="lede">每一页从一个问题出发：先猜，再动手试，最后弄清楚刚才发生了什么。页面越积越多，它们之间的联系就画在下面这张地图上。</p>
+        <h1>用更形象直观的方式，<br>走进一个新领域</h1>
+        <p class="lede">每一页从一个具体的问题出发，用交互实验、动态演示、数形结合的图解或形象的类比把它讲清楚，并用知识地图的形式把这些内容联系起来。</p>
       </div>
       <div class="stats" id="stats"></div>
     </div>
     <div class="mapgrid">
       <div class="sheet">
-        <div class="fig" id="mapBox"><svg id="map" role="img" aria-label="知识地图：各实验页面及其联系"></svg></div>
+        <div class="fig" id="mapBox"><svg id="map" role="img" aria-label="知识地图：各页面及其联系"></svg></div>
         <div class="legend">
           <span><svg width="16" height="16"><circle cx="8" cy="8" r="7" fill="var(--sage)" opacity=".7"/></svg>已完成</span>
           <span><svg width="16" height="16"><circle cx="8" cy="8" r="6.5" fill="none" stroke="var(--muted)" stroke-dasharray="2 2"/></svg>计划中</span>
@@ -135,8 +135,8 @@ footer{color:var(--muted);font-size:14px}
 <section class="band" style="padding-top:0">
   <div class="wrap sheet" style="padding:clamp(18px,3vw,32px)">
     <div class="about">
-      <div><h2>这里在做什么</h2><p>这是我学习新知识的地方，也是一个慢慢长大的作品集。我不想只记笔记，而是把每个弄不懂的问题做成一个可以亲手改变条件、观察结果的小实验。所有图和数字都是页面里实时算出来的。</p><p class="sign"><a href="me.html" style="color:inherit">—— 淇思工坊</a></p></div>
-      <div><h2>每一页的结构</h2><ol><li>一个问题或现象</li><li>先猜一下会发生什么</li><li>动手试：调参数、拖数据</li><li>解释刚才发生了什么</li><li>按兴趣深入：数学、代码、下一个问题</li></ol></div>
+      <div><h2>这里在做什么</h2><p>这是一个学习新知识的地方，也是一个慢慢长大的作品集。比起直接从定义和公式读起，我更想先“看见”一个概念：拖动数据看模型怎样变化，看一段动画理解一个过程，或者用一张图把公式背后的直觉画出来。</p><p class="sign"><a href="me.html" style="color:inherit">—— 淇思工坊</a></p></div>
+      <div><h2>每一页里有什么</h2><ol><li><b>一个问题</b>：从一个具体的疑问或现象开始，而不是从定义开始。</li><li><b>一个画面</b>：用交互实验、动态演示、图解或类比，让它变得看得见、摸得着。</li><li><b>一段解释</b>：弄清楚刚才看到了什么，以及为什么会这样。</li><li><b>几条小路</b>：想深入的话，可以展开数学推导、参考资料，或者沿着地图走向下一个问题。</li></ol></div>
     </div>
   </div>
 </section>
@@ -182,7 +182,7 @@ function drawCard(){const p=byId[sel],L=linksOf(p);
    <h3>${p.q}</h3><div class="concept">${p.concept}</div><div class="en">${p.en}</div><p>${p.blurb}</p>
    <div class="tags">${p.topics.map(t=>`<span class="tag"><i style="background:${TOPICS[t].c}"></i>${TOPICS[t].name}</span>`).join('')}</div>
    <div class="links">${L.prev.length?`<div>先看：${li(L.prev)}</div>`:''}${L.next.length?`<div>接着看：${li(L.next)}</div>`:''}${L.rel.length?`<div>相关：${li(L.rel)}</div>`:''}${!L.prev.length&&!L.next.length&&!L.rel.length?'<div style="color:var(--muted)">还没有和其他页面连上</div>':''}</div>
-   <a class="go" href="${p.url||'#'}" ${p.url?'':'aria-disabled="true"'}>${p.url?'进入实验':'还在计划中'}</a>`}
+   <a class="go" href="${p.url||'#'}" ${p.url?'':'aria-disabled="true"'}>${p.url?'去看看':'还在计划中'}</a>`}
 
 function drawDir(){const keys=topic==='all'?Object.keys(TOPICS):[topic];
   $('chips').innerHTML=[['all','全部'],...Object.entries(TOPICS).map(([k,v])=>[k,v.name])].map(([k,n])=>`<button class="chip" data-t="${k}" aria-pressed="${topic===k}">${n}</button>`).join('');
