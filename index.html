@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-style="d">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qirious</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700&family=Noto+Sans+SC:wght@400;500&family=Nunito:wght@400;500;600;700&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 安静、个人、带点好奇心的个人实验网站 Qirious
+   IDEA: 手帐的扉页：一张用彩铅连起来的知识星图，旁边是目录
+   PICTURE: 手绘知识地图，节点是水彩晕染的圆点，连线是铅笔线
+   COLOUR and TYPE: 与实验页相同的莫兰迪纸色与三种主色，每个主题一种颜色；Noto Serif SC / Noto Sans SC / Caveat
+   LAYOUT: 标题 → 地图 + 选中卡片 → 主题筛选与目录 → 关于 */
+:root{color-scheme:light dark;
+--bg:light-dark(#F7F3EC,#1F1D1B);--paper:light-dark(#FFFDF9,#292724);--ink:light-dark(#2F2C28,#ECE5D8);
+--muted:light-dark(#716B62,#A9A195);--line:light-dark(#E3DCD0,#403C37);
+--sage:light-dark(#86A887,#9DB29C);--rose:light-dark(#C98B80,#D49C94);--plum:light-dark(#7E72A8,#AFA5D0);--ochre:light-dark(#D2A65C,#D7B97E);--teal:light-dark(#74A3A0,#9DBAB8)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:15.5px/1.7 "Noto Sans SC",system-ui,sans-serif;overflow-x:clip}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.28;mix-blend-mode:multiply;
+background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .25 0 0 0 0 .22 0 0 0 0 .18 0 0 0 .45 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) body::before{mix-blend-mode:screen;opacity:.12}}
+:root[data-theme=dark] body::before{mix-blend-mode:screen;opacity:.12}
+.band{padding:clamp(26px,4vw,52px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+h1{font:700 clamp(28px,3.6vw,42px)/1.12 "Noto Serif SC",serif;margin:0 0 .3em;text-wrap:balance}
+h2{font:700 clamp(20px,2vw,24px)/1.25 "Noto Serif SC",serif;margin:0 0 .6em}
+.lede{max-width:60ch;font-size:15px;color:var(--muted);margin:0}
+.nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:clamp(20px,3vw,36px)}
+.word{font:700 26px/1 "Nunito",sans-serif;letter-spacing:.01em;color:var(--ink);text-decoration:none}.word b{color:var(--rose);font-weight:800}
+.who{text-decoration:none;min-height:36px;display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);padding:3px 12px 3px 3px;border-radius:999px;background:var(--paper);border:.5px solid var(--line)}
+.who i{font:normal 600 13px "Noto Serif SC",serif;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:light-dark(#CEC6E4,#5C5384);color:light-dark(#4A4070,#EEE9FA)}
+.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px 32px}
+.stats{display:flex;gap:22px}.stats div{font-size:13px;color:var(--muted)}.stats b{display:block;font:700 34px/1 "Caveat",cursive;color:var(--ink)}
+.mapgrid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:stretch;margin-top:22px}
+@media(max-width:900px){.mapgrid{grid-template-columns:minmax(0,1fr)}}
+.sheet{background:var(--paper);border-radius:18px;box-shadow:0 1px 0 var(--line),0 14px 30px -22px rgba(90,70,50,.28);padding:14px}
+.fig{position:relative;min-height:460px}.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.node{cursor:pointer}.node:focus{outline:none}.node:focus-visible .ring{stroke:var(--ink);stroke-width:2}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13.5px;color:var(--muted);padding:6px 6px 0}
+.legend svg{vertical-align:-3px;margin-right:6px}
+.card{display:flex;flex-direction:column;gap:10px}
+.card .st{font-size:13px;color:var(--muted)}
+.card h3{font:700 19px/1.4 "Noto Serif SC",serif;margin:0}
+.card .concept{font:700 26px/1 "Caveat",cursive;color:var(--plum)}
+.card p{margin:0;color:var(--muted);font-size:14.5px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:13px;padding:2px 10px;border-radius:999px;background:var(--bg);white-space:nowrap}
+.tag i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.links{font-size:14.5px}.links div{margin-top:4px}.links a{color:var(--ink);text-underline-offset:3px;cursor:pointer}
+.go{margin-top:auto;display:inline-flex;align-items:center;justify-content:center;min-height:46px;border-radius:999px;background:var(--ink);color:var(--paper);text-decoration:none;font-weight:500;padding:0 20px}
+.go[aria-disabled=true]{background:transparent;color:var(--muted);border:1.5px dashed var(--line);pointer-events:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}
+.chip{font:inherit;font-size:15px;min-height:44px;padding:6px 16px;border-radius:999px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.chip:focus-visible,.entry:focus-visible,.go:focus-visible{outline:2px solid var(--plum);outline-offset:2px}
+.groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:26px 30px}
+.group h3{font:700 17px "Noto Serif SC",serif;margin:0 0 10px;display:flex;align-items:center;gap:10px}
+.group h3 i{width:14px;height:14px;border-radius:50%}
+.group h3 small{font:500 14px "Noto Sans SC";color:var(--muted)}
+.entry{display:block;padding:12px 14px;border-radius:14px;color:var(--ink);text-decoration:none;border:1.5px solid transparent;margin-bottom:8px;background:var(--paper)}
+.entry:hover{border-color:var(--line)}
+.entry.plan{background:transparent;border:1.5px dashed var(--line)}
+.entry b{font-weight:500;display:block}
+.entry span{font-size:13.5px;color:var(--muted)}
+.empty{color:var(--muted)}
+.about{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:24px}
+.about ol{margin:0;padding-left:1.3em}.about li{margin-bottom:4px}
+.about p{margin:0;max-width:62ch}.about .sign{margin-top:10px;color:var(--muted);text-align:right;max-width:none}.about .pun{margin-top:14px;font-size:13.5px;color:var(--muted)}
+footer{color:var(--muted);font-size:14px}
+@media(prefers-reduced-motion:no-preference){.blob{transition:transform .3s}.node:hover .blob{transform:scale(1.08)}}
+.mast,.meta,.figcap,.en,.num,.lead{display:none}
+/* B 学术期刊风 */
+/* C 图录风 */
+/* D 手帐×期刊 */
+:root[data-style=d] h1{font-weight:600}
+:root[data-style=d] h2{font-weight:600;border-top:.5px solid var(--line);padding-top:12px}
+:root[data-style=d] .sheet{border-radius:10px;box-shadow:0 1px 2px rgba(90,70,50,.06);border:.5px solid var(--line)}
+:root[data-style=d] .stats b{font:600 30px/1 "Nunito",sans-serif}
+:root[data-style=d] .figcap{display:block;font-size:13px;color:var(--muted);padding:8px 6px 2px;border-top:.5px solid var(--line);margin-top:8px}
+:root[data-style=d] .figcap b{color:var(--ink);font-weight:500}
+:root[data-style=d] .card h3{font-weight:600}
+:root[data-style=d] .concept{font:600 15px "Noto Sans SC";color:var(--plum)}
+:root[data-style=d] .en{display:block;font:500 15px "Nunito",sans-serif;color:var(--muted);margin-top:-6px}
+:root[data-style=d] .tag{border-radius:4px}
+:root[data-style=d] .go{border-radius:8px}
+:root[data-style=d] .chip{border-radius:8px}
+:root[data-style=d] .group h3{border-bottom:.5px solid var(--line);padding-bottom:6px}
+:root[data-style=d] .group h3 i{border-radius:2px;width:10px;height:10px}
+:root[data-style=d] .entry{display:grid;grid-template-columns:2.4em minmax(0,1fr);column-gap:4px;border-radius:8px;border:.5px solid var(--line)}
+:root[data-style=d] .entry.plan{border:.5px dashed var(--line)}
+:root[data-style=d] .num{display:block;grid-row:1 / span 2;font:400 16px/1.6 "Nunito",sans-serif;color:var(--muted)}
+:root[data-style=d] .entry b,:root[data-style=d] .m2{grid-column:2}
+</style>
+</head>
+<body>
+<header class="band">
+  <div class="wrap">
+    <nav class="nav"><a class="word" href="index.html"><b>Qi</b>rious</a><a class="who" href="me.html"><i>淇</i>淇思工坊</a></nav>
+    <div class="top">
+      <div>
+        
+        <h1>把想弄懂的问题，<br>变成可以动手的小实验</h1>
+        <p class="lede">每一页从一个问题出发：先猜，再动手试，最后弄清楚刚才发生了什么。页面越积越多，它们之间的联系就画在下面这张地图上。</p>
+      </div>
+      <div class="stats" id="stats"></div>
+    </div>
+    <div class="mapgrid">
+      <div class="sheet">
+        <div class="fig" id="mapBox"><svg id="map" role="img" aria-label="知识地图：各实验页面及其联系"></svg></div>
+        <div class="legend">
+          <span><svg width="16" height="16"><circle cx="8" cy="8" r="7" fill="var(--sage)" opacity=".7"/></svg>已完成</span>
+          <span><svg width="16" height="16"><circle cx="8" cy="8" r="6.5" fill="none" stroke="var(--muted)" stroke-dasharray="2 2"/></svg>计划中</span>
+          <span><svg width="26" height="10"><path d="M1 5h20" stroke="var(--muted)" stroke-width="1.6"/><path d="M18 1l5 4-5 4" fill="none" stroke="var(--muted)" stroke-width="1.6"/></svg>看完可以接着看</span>
+          <span><svg width="26" height="10"><path d="M1 5h24" stroke="var(--muted)" stroke-width="1.6" stroke-dasharray="3 4"/></svg>相关</span>
+        </div>
+        <div class="figcap"><b>图 1</b>　知识地图。点任意节点查看详情；实线箭头表示“看完可以接着看”，虚线表示“相关”。</div>
+      </div>
+      <aside class="sheet card" id="card" aria-live="polite"></aside>
+    </div>
+  </div>
+</header>
+
+<main class="band" style="padding-top:0">
+  <div class="wrap">
+    <h2>目录</h2>
+    <div class="chips" id="chips" role="group" aria-label="按主题筛选"></div>
+    <div class="groups" id="groups"></div>
+  </div>
+</main>
+
+<section class="band" style="padding-top:0">
+  <div class="wrap sheet" style="padding:clamp(18px,3vw,32px)">
+    <div class="about">
+      <div><h2>这里在做什么</h2><p>这是我学习新知识的地方，也是一个慢慢长大的作品集。我不想只记笔记，而是把每个弄不懂的问题做成一个可以亲手改变条件、观察结果的小实验。所有图和数字都是页面里实时算出来的。</p><p class="sign"><a href="me.html" style="color:inherit">—— 淇思工坊</a></p></div>
+      <div><h2>每一页的结构</h2><ol><li>一个问题或现象</li><li>先猜一下会发生什么</li><li>动手试：调参数、拖数据</li><li>解释刚才发生了什么</li><li>按兴趣深入：数学、代码、下一个问题</li></ol></div>
+    </div>
+  </div>
+</section>
+<footer class="band wrap" style="padding-top:0">Qirious · 2026 —　｜　原型阶段：标“计划中”的页面是举例，还没有做</footer>
+
+<script src="pages.js"></script>
+<script>
+{
+const {TOPICS,PAGES}=window.QIRIOUS;
+const byId=Object.fromEntries(PAGES.map(p=>[p.id,p]));
+const $=id=>document.getElementById(id);
+let sel=(location.hash.slice(1) in byId)?location.hash.slice(1):'overfit',topic='all';
+const linksOf=p=>({prev:PAGES.filter(o=>o.next.includes(p.id)),next:p.next.map(i=>byId[i]),rel:[...new Set([...p.related.map(i=>byId[i]),...PAGES.filter(o=>o.related.includes(p.id))])]});
+
+$('stats').innerHTML=`<div><b>${PAGES.filter(p=>p.status==='done').length}</b>已完成</div><div><b>${PAGES.filter(p=>p.status==='plan').length}</b>计划中</div><div><b>${Object.keys(TOPICS).length}</b>个主题</div>`;
+
+const svg=$('map');
+function drawMap(){const W=svg.clientWidth,H=svg.clientHeight;if(!W)return;const sm=W<560,pad=sm?44:64;
+  const P=p=>[pad+p.x*(W-2*pad),pad*.8+p.y*(H-1.8*pad)];
+  const edge=(a,b,dash)=>{const[x1,y1]=P(a),[x2,y2]=P(b),ra=a.status==='done'?32:25,rb=b.status==='done'?32:25,d=Math.hypot(x2-x1,y2-y1),ux=(x2-x1)/d,uy=(y2-y1)/d;
+    const sx=x1+ux*ra,sy=y1+uy*ra,ex=x2-ux*(rb+6),ey=y2-uy*(rb+6),mx=(sx+ex)/2-uy*18,my=(sy+ey)/2+ux*18;
+    const on=sel===a.id||sel===b.id;
+    return `<path d="M${sx} ${sy} Q${mx} ${my} ${ex} ${ey}" fill="none" stroke="var(--${on?'ink':'muted'})" stroke-opacity="${on?.8:.5}" stroke-width="1.7" stroke-linecap="round" ${dash?'stroke-dasharray="3 6"':'marker-end="url(#ah)"'}/>`};
+  let edges='';const seen=new Set();
+  for(const p of PAGES){for(const n of p.next)edges+=edge(p,byId[n],false);
+    for(const r of p.related){const k=[p.id,r].sort().join();if(!seen.has(k)){seen.add(k);edges+=edge(p,byId[r],true)}}}
+  const nodes=PAGES.map(p=>{const[x,y]=P(p),r=p.status==='done'?32:25,dim=topic!=='all'&&!p.topics.includes(topic),c=TOPICS[p.topics[0]].c,c2=p.topics[1]?TOPICS[p.topics[1]].c:c;
+    const lx=x>W-90?'end':x<90?'start':'middle',tx=lx==='end'?x+r:lx==='start'?x-r:x;
+    return `<g class="node" tabindex="0" role="button" aria-label="${p.short}：${p.q}" data-id="${p.id}" opacity="${dim?.25:1}">
+      <g class="blob" style="transform-origin:${x}px ${y}px">
+      ${p.status==='done'?`<g filter="url(#wc)"><circle cx="${x-6}" cy="${y+3}" r="${r}" fill="${c}" opacity=".6"/><circle cx="${x+7}" cy="${y-4}" r="${r*.8}" fill="${c2}" opacity=".5"/></g>`
+        :`<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" opacity=".3" filter="url(#wc)"/>`}
+      <circle class="ring" cx="${x}" cy="${y}" r="${r+4}" fill="none" stroke="${sel===p.id?'var(--ink)':p.status==='done'?'none':'var(--muted)'}" stroke-width="1.4" ${p.status==='done'||sel===p.id?'':'stroke-dasharray="2 4"'} filter="url(#rough)"/></g>
+      <text x="${tx}" y="${y+r+24}" text-anchor="${lx}" font-family="Noto Sans SC" font-size="${sm?12.5:13.5}" font-weight="500" fill="var(--ink)">${p.short}</text></g>`}).join('');
+  svg.innerHTML=`<defs><filter id="wc" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="3" seed="4"/><feDisplacementMap in="SourceGraphic" scale="12"/><feGaussianBlur stdDeviation="1.3"/></filter>
+    <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" seed="2"/><feDisplacementMap in="SourceGraphic" scale="2.5"/></filter>
+    <marker id="ah" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1L8 5L1 9" fill="none" stroke="context-stroke" stroke-width="1.6" stroke-linecap="round"/></marker></defs>
+    <g filter="url(#rough)">${edges}</g>${nodes}`}
+
+function li(list){return list.map(o=>`<a data-go="${o.id}">${o.short}</a>`).join('、')}
+function drawCard(){const p=byId[sel],L=linksOf(p);
+  $('card').innerHTML=`<div class="st">${p.status==='done'?'已完成':'计划中 · 还没有做'}</div>
+   <h3>${p.q}</h3><div class="concept">${p.concept}</div><div class="en">${p.en}</div><p>${p.blurb}</p>
+   <div class="tags">${p.topics.map(t=>`<span class="tag"><i style="background:${TOPICS[t].c}"></i>${TOPICS[t].name}</span>`).join('')}</div>
+   <div class="links">${L.prev.length?`<div>先看：${li(L.prev)}</div>`:''}${L.next.length?`<div>接着看：${li(L.next)}</div>`:''}${L.rel.length?`<div>相关：${li(L.rel)}</div>`:''}${!L.prev.length&&!L.next.length&&!L.rel.length?'<div style="color:var(--muted)">还没有和其他页面连上</div>':''}</div>
+   <a class="go" href="${p.url||'#'}" ${p.url?'':'aria-disabled="true"'}>${p.url?'进入实验':'还在计划中'}</a>`}
+
+function drawDir(){const keys=topic==='all'?Object.keys(TOPICS):[topic];
+  $('chips').innerHTML=[['all','全部'],...Object.entries(TOPICS).map(([k,v])=>[k,v.name])].map(([k,n])=>`<button class="chip" data-t="${k}" aria-pressed="${topic===k}">${n}</button>`).join('');
+  $('groups').innerHTML=keys.map((k,gi)=>{const list=PAGES.filter(p=>p.topics.includes(k)).sort((a,b)=>(a.status>b.status)-(a.status<b.status));
+    return `<div class="group"><h3><i style="background:${TOPICS[k].c}"></i>${TOPICS[k].name}<small>${list.length} 页</small></h3>
+    ${list.length?list.map((p,i)=>`<a class="entry ${p.status}" href="${p.url||'#'+p.id}" data-pick="${p.id}"><span class="num">${Object.keys(TOPICS).indexOf(k)+1}.${i+1}</span><b>${p.q}</b><span class="lead"></span><span class="m2"><span class="cpt">${p.concept} · </span>${p.status==='done'?'已完成':'计划中'}</span></a>`).join(''):'<div class="empty">还没有页面</div>'}</div>`}).join('')}
+
+function pick(id){sel=id;try{history.replaceState(null,'','#'+id)}catch(_){}drawMap();drawCard()}
+function render(){drawMap();drawCard();drawDir()}
+svg.addEventListener('click',e=>{const g=e.target.closest('.node');if(g)pick(g.dataset.id)});
+svg.addEventListener('keydown',e=>{const g=e.target.closest('.node');if(g&&(e.key==='Enter'||e.key===' ')){e.preventDefault();pick(g.dataset.id)}});
+$('card').addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(a)pick(a.dataset.go)});
+$('chips').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(b){topic=b.dataset.t;render()}});
+$('groups').addEventListener('click',e=>{const a=e.target.closest('[data-pick]');if(a&&!byId[a.dataset.pick].url){e.preventDefault();pick(a.dataset.pick);$('mapBox').scrollIntoView({behavior:'smooth',block:'center'})}});
+addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h in byId&&h!==sel)pick(h)});
+render();const ro=new ResizeObserver(drawMap);ro.observe($('mapBox'));
+}
+</script>
+</body>
+</html>

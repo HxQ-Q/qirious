@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-style="d">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>过拟合 · Qirious</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700&family=Noto+Sans+SC:wght@400;500&family=Nunito:wght@400;500;600;700&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 安静、个人、带点好奇心的个人实验网站 Qirious
+   IDEA: 一页手绘实验笔记本：纸张颗粒、水彩晕染的页眉、蜡笔点出的数据
+   PICTURE: 可拖动的数据与拟合曲线本身，占据首屏主体
+   COLOUR and TYPE: 莫兰迪纸色底 + 鼠尾草绿 / 灰玫瑰 / 雾紫；Noto Serif SC 标题，Noto Sans SC 正文，Caveat 手写数字
+   LAYOUT: 小标题 → 先猜 → 大图 + 侧栏控件 → 解释与深入 */
+:root{color-scheme:light dark;
+--bg:light-dark(#F7F3EC,#1F1D1B);--paper:light-dark(#FFFDF9,#292724);--ink:light-dark(#2F2C28,#ECE5D8);
+--muted:light-dark(#716B62,#A9A195);--line:light-dark(#E3DCD0,#403C37);
+--sage:light-dark(#86A887,#9DB29C);--rose:light-dark(#C98B80,#D49C94);--plum:light-dark(#7E72A8,#AFA5D0);--ochre:light-dark(#D2A65C,#D7B97E)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:15.5px/1.7 "Noto Sans SC",system-ui,sans-serif;overflow-x:clip}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.28;mix-blend-mode:multiply;
+background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .25 0 0 0 0 .22 0 0 0 0 .18 0 0 0 .45 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) body::before{mix-blend-mode:screen;opacity:.12}}
+:root[data-theme=dark] body::before{mix-blend-mode:screen;opacity:.12}
+.band{padding:clamp(28px,4vw,56px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+header{position:relative;overflow:hidden;padding-bottom:12px}
+header svg.wash{position:absolute;inset:-40px -10% auto auto;width:min(760px,95vw);height:300px;opacity:.55;pointer-events:none}
+h1{font:700 clamp(27px,3.4vw,40px)/1.15 "Noto Serif SC",serif;margin:.2em 0 .35em;text-wrap:balance;position:relative}
+h2{font:700 clamp(20px,2vw,24px)/1.25 "Noto Serif SC",serif;margin:0 0 .6em}
+.nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:clamp(20px,3vw,36px)}
+.word{font:700 26px/1 "Nunito",sans-serif;letter-spacing:.01em;color:var(--ink);text-decoration:none}.word b{color:var(--rose);font-weight:800}
+.who{text-decoration:none;min-height:36px;display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);padding:3px 12px 3px 3px;border-radius:999px;background:var(--paper);border:.5px solid var(--line)}
+.who i{font:normal 600 13px "Noto Serif SC",serif;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:light-dark(#CEC6E4,#5C5384);color:light-dark(#4A4070,#EEE9FA)}
+.back{position:relative;display:inline-block;color:var(--muted);text-decoration:none;font-size:15px;min-height:32px}.back:hover{color:var(--ink)}
+.kicker{font:600 20px "Caveat",cursive;color:var(--rose);position:relative}
+.lede{max-width:62ch;color:var(--muted);margin:0;position:relative}
+.guess{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:22px 0 0;position:relative}
+.guess b{font-weight:500}
+button,.chip{font:inherit;font-size:15px;min-height:44px;padding:8px 16px;border-radius:999px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--muted)}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--plum);outline-offset:2px}
+button[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:22px;align-items:start}
+@media(max-width:900px){.lab{grid-template-columns:minmax(0,1fr)}}
+.sheet{background:var(--paper);border-radius:18px;box-shadow:0 1px 0 var(--line),0 14px 30px -22px rgba(90,70,50,.28);padding:14px}
+.fig{position:relative;min-height:420px;touch-action:none}.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--muted);padding:6px 6px 0}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.hint{font:500 19px "Caveat",cursive;color:var(--muted);padding:2px 6px}
+.side{display:grid;gap:16px}
+.ctl label{display:flex;justify-content:space-between;font-size:15px;margin-bottom:2px}
+.ctl output{font:700 22px/1 "Caveat",cursive;color:var(--plum)}
+input[type=range]{width:100%;height:44px;accent-color:var(--plum);margin:0}
+.toggles{display:grid;gap:8px}
+.toggles label{display:flex;justify-content:flex-start;gap:10px;align-items:center;min-height:36px;font-size:15px;cursor:pointer}
+.toggles input{width:20px;height:20px;accent-color:var(--plum)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.nums{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.num{border-radius:14px;padding:10px 12px;background:var(--bg)}
+.num span{display:block;font-size:13px;color:var(--muted)}
+.num strong{font:700 34px/1.1 "Caveat",cursive;white-space:nowrap}
+.num.tr strong{color:var(--sage)}.num.te strong{color:var(--rose)}
+.efig{position:relative;min-height:190px}.efig>svg{position:absolute;inset:0;width:100%;height:100%}
+.efig.locked svg{filter:blur(5px);opacity:.5}
+.efig .lock{display:none;position:absolute;inset:0;place-items:center;text-align:center;font:500 21px "Caveat",cursive;color:var(--muted);padding:12px}
+.efig.locked .lock{display:grid}
+.cap{font-size:13px;color:var(--muted);margin:4px 2px 0}
+.warn{display:none;font-size:14px;color:var(--rose);border:1.5px dashed var(--rose);border-radius:12px;padding:8px 10px}
+.warn.on{display:block}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:22px}
+.cols p{margin:0 0 .8em;max-width:68ch}
+#insight{font-size:16px;border-left:3px solid var(--sage);padding:4px 0 4px 14px;margin:0 0 1.2em}
+details{border-top:1.5px solid var(--line);padding:12px 0}
+summary{cursor:pointer;font-weight:500;min-height:32px}
+.math{font-family:"Noto Serif SC",serif;background:var(--bg);border-radius:12px;padding:10px 14px;overflow-x:auto;white-space:nowrap}
+ .nextgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:14px}
+.nx{display:block;background:var(--paper);border:1.5px dashed var(--line);border-radius:16px;padding:14px 16px;color:var(--ink);text-decoration:none}.nx:hover{border-color:var(--muted)}
+.nx span{display:block;font-size:13px;color:var(--muted)}.nx em{display:block;font-style:normal;font:600 20px "Caveat",cursive;color:var(--plum)}
+footer{color:var(--muted);font-size:14px}
+@media(prefers-reduced-motion:no-preference){.fit-path{transition:d .25s}}
+.figcap{display:none}
+:root[data-style=d] h1{font-weight:600}
+:root[data-style=d] h2{font-weight:600;border-top:.5px solid var(--line);padding-top:12px}
+:root[data-style=d] .sheet{border-radius:10px;box-shadow:0 1px 2px rgba(90,70,50,.06);border:.5px solid var(--line)}
+:root[data-style=d] .num{border-radius:8px}
+:root[data-style=d] .num strong{font:600 26px/1.1 "Nunito",sans-serif}
+:root[data-style=d] .ctl output{font:600 20px/1.1 "Nunito",sans-serif}
+:root[data-style=d] button,:root[data-style=d] .nx{border-radius:8px}
+:root[data-style=d] .figcap{display:block;font-size:13px;color:var(--muted);padding:6px 6px 0}
+:root[data-style=d] .figcap b{color:var(--ink);font-weight:500}
+:root[data-style=d] .hint{font:400 13px "Noto Sans SC";padding-top:4px}
+</style>
+</head>
+<body>
+<header class="band">
+  <svg class="wash" viewBox="0 0 760 300" aria-hidden="true">
+    <defs><filter id="wc" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency=".012" numOctaves="4" seed="7"/><feDisplacementMap in="SourceGraphic" scale="70"/><feGaussianBlur stdDeviation="6"/></filter></defs>
+    <g filter="url(#wc)"><ellipse cx="520" cy="130" rx="210" ry="95" fill="var(--sage)" opacity=".45"/><ellipse cx="330" cy="90" rx="140" ry="70" fill="var(--rose)" opacity=".35"/><ellipse cx="660" cy="210" rx="120" ry="60" fill="var(--plum)" opacity=".3"/></g>
+  </svg>
+  <div class="wrap">
+    <nav class="nav"><a class="word" href="../index.html"><b>Qi</b>rious</a><a class="who" href="../me.html"><i>淇</i>淇思工坊</a></nav>
+    <div class="kicker">机器学习 · 统计</div>
+    <h1>机器怎样从例子里学到规律？<br>又为什么会学“过头”？</h1>
+    <p class="lede">下面的绿色点是机器能看到的“练习题”，玫瑰色空心点是它没见过的“考题”。机器用一条多项式曲线去贴合练习题，次数越高，曲线越灵活。</p>
+    <div class="guess" role="group" aria-label="先猜一下">
+      <b>先猜一下：</b>次数从 1 调到 12，考题上的误差会……
+      <button data-g="down">一直变小</button><button data-g="u">先变小，后变大</button><button data-g="flat">基本不变</button>
+    </div>
+  </div>
+</header>
+
+<main class="band" style="padding-top:8px">
+  <div class="wrap lab">
+    <div class="sheet">
+      <div class="fig" id="plotBox"><svg id="plot" role="img" aria-label="数据点与拟合曲线"></svg></div>
+      <div class="legend"><span><i style="background:var(--sage)"></i>练习题（训练数据）</span><span><i style="border:2px solid var(--rose)"></i>考题（测试数据）</span><span><i style="background:var(--plum);border-radius:2px;height:4px"></i>机器学到的曲线</span><span id="lgTrue" hidden><i style="border-top:2px dashed var(--ochre);border-radius:0;height:0"></i>真实规律</span></div>
+      <div class="figcap"><b>图 1</b>　练习题、考题与机器学到的曲线（次数可在右侧调整）</div>
+      <div class="hint">点空白处加一个练习点 · 拖动点改位置 · 把点拖出框外就删掉</div>
+    </div>
+    <aside class="side">
+      <div class="sheet ctl">
+        <label for="deg">多项式次数（复杂程度）<output id="degOut">3</output></label>
+        <input type="range" id="deg" min="1" max="12" value="3">
+        <label for="noise">噪声大小<output id="noiseOut">0.25</output></label>
+        <input type="range" id="noise" min="0" max="0.6" step="0.05" value="0.25">
+        <label for="cnt">练习题数量<output id="cntOut">12</output></label>
+        <input type="range" id="cnt" min="5" max="40" value="12">
+        <div class="toggles">
+          <label><input type="checkbox" id="showTrue">显示真实规律（现实中通常看不到）</label>
+          <label><input type="checkbox" id="showTest" checked>显示考题</label>
+          <label><input type="checkbox" id="cheat">偷看考题：把考题也拿去训练</label>
+        </div>
+        <div class="row"><button id="resample">换一组数据</button><button id="undo">撤销</button></div>
+      </div>
+      <div class="sheet">
+        <div class="nums"><div class="num tr"><span>练习题误差</span><strong id="trE">–</strong></div><div class="num te"><span>考题误差</span><strong id="teE">–</strong></div></div>
+        <p class="cap">误差 = 预测值与实际值之差的平方的平均（MSE）</p>
+        <div class="warn" id="warn">你正在“偷看考题”：考题已经被用来训练，这里的考题误差不再能说明它在新数据上的表现。</div>
+      </div>
+      <div class="sheet">
+        <div class="efig locked" id="errBox"><svg id="err" role="img" aria-label="不同次数下的误差曲线"></svg><div class="lock">先在上面猜一下，<br>再揭晓这张图</div></div>
+        <p class="cap">横轴：次数 1–12 · 纵轴：误差（对数刻度）· 竖虚线：当前次数</p>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<section class="band" style="padding-top:0">
+  <div class="wrap">
+    <h2>刚才发生了什么</h2>
+    <p id="insight">先猜一下，再拖动“次数”滑块，这里会根据你眼前这组数据写出观察。</p>
+    <div class="cols">
+      <div>
+        <p><b>练习题误差几乎只会下降。</b>次数越高，曲线可调的“旋钮”越多，总能更贴近每一个练习点。次数足够高时，它甚至能穿过每一个点，误差接近 0。</p>
+        <p><b>但考题误差不一样。</b>练习点里混着随机噪声。曲线太灵活时，它把噪声也当成了规律去记，于是在没见过的点上反而出错。这就是<b>过拟合</b>；反过来，次数太低、连主要趋势都抓不住，叫<b>欠拟合</b>。</p>
+      </div>
+      <div>
+        <p><b>为什么要分开练习题和考题？</b>机器在练习题上表现好，不代表真的学会了。只有用它没见过的数据检验，才能估计它面对新情况的表现，这叫<b>泛化</b>能力。</p>
+        <p><b>“偷看考题”开关</b>演示了一个常见错误：考题一旦参与训练，考题误差就会变得很好看，但它已经不再是独立的检验了。</p>
+      </div>
+    </div>
+    <details><summary>数学：机器具体在算什么</summary>
+      <p>模型是一条 d 次多项式曲线，机器要找出一组系数 w，让它在练习题上的平方误差之和最小（最小二乘法）：</p>
+      <div class="math">ŷ(x) = w₀ + w₁·φ₁(x) + … + w_d·φ_d(x)　　min_w Σᵢ ( yᵢ − ŷ(xᵢ) )²</div>
+      <p>为了数值稳定，φ 用的是勒让德多项式（和 1, x, x², … 张成同一组曲线，只是计算更稳）。当练习点比系数还少时，方程有无数个解，程序加了一个极小的正则项 λ = 10⁻⁷ 来选出其中一个。练习题误差和考题误差都按 MSE 计算。</p>
+    </details>
+    <details><summary>数据从哪里来</summary>
+      <p>数据由程序生成：真实规律是 y = sin(2.4x) + 0.3x，x 在 −1 到 1 之间随机取，每个点再加上正态分布噪声（标准差就是“噪声大小”）。考题固定 40 个，和练习题来自同一个规律，但互不重复。</p>
+    </details>
+    <details><summary>可以接着问的问题</summary>
+      <p>现实里看不到“真实规律”，也不该偷看考题，那到底该怎么选次数？这会引出<b>验证集</b>和<b>交叉验证</b>，可以作为下一个实验。</p>
+    </details>
+  </div>
+</section>
+
+<section class="band" style="padding-top:0"><div class="wrap">
+    <h2>接着看</h2>
+    <div class="nextgrid">
+      <a class="nx" href="../index.html#cv"><span>计划中</span>看不到考题时，怎么选模型的复杂度？<em>交叉验证</em></a>
+      <a class="nx" href="../index.html#reg"><span>计划中</span>不降低次数，能不能让曲线老实一点？<em>正则化</em></a>
+    </div>
+  </div></section>
+<footer class="band wrap" style="padding-top:0">Qirious　｜　所有数据为程序随机生成，所有曲线和误差都是实时计算的。</footer>
+
+<script>
+{
+const $=id=>document.getElementById(id);
+const truth=x=>Math.sin(2.4*x)+0.3*x;
+const XR=[-1.1,1.1],YR=[-2.6,2.6],MAXD=12,LAMBDA=1e-7;
+let seed=Date.now()%100000,st={train:[],test:[],deg:3,noise:.25,n:12,showTrue:false,showTest:true,cheat:false,guess:null},hist=[];
+
+function rng(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gen(){const r=rng(seed),g=()=>Math.sqrt(-2*Math.log(r()+1e-12))*Math.cos(2*Math.PI*r());
+  const pt=()=>{const x=r()*2-1;return{x,y:truth(x)+st.noise*g()}};
+  st.train=Array.from({length:st.n},pt);st.test=Array.from({length:40},pt);hist=[]}
+
+function basis(x,d){const p=[1,x];for(let k=1;k<d;k++)p.push(((2*k+1)*x*p[k]-k*p[k-1])/(k+1));return p.slice(0,d+1)}
+function fit(pts,d){const m=d+1,A=Array.from({length:m},()=>new Array(m+1).fill(0));
+  for(const{x,y}of pts){const b=basis(x,d);for(let i=0;i<m;i++){for(let j=0;j<m;j++)A[i][j]+=b[i]*b[j];A[i][m]+=b[i]*y}}
+  for(let i=0;i<m;i++)A[i][i]+=LAMBDA;
+  for(let c=0;c<m;c++){let p=c;for(let r=c+1;r<m;r++)if(Math.abs(A[r][c])>Math.abs(A[p][c]))p=r;[A[c],A[p]]=[A[p],A[c]];
+    for(let r=c+1;r<m;r++){const f=A[r][c]/A[c][c];for(let k=c;k<=m;k++)A[r][k]-=f*A[c][k]}}
+  const w=new Array(m).fill(0);for(let i=m-1;i>=0;i--){let s=A[i][m];for(let k=i+1;k<m;k++)s-=A[i][k]*w[k];w[i]=s/A[i][i]}
+  return x=>basis(x,d).reduce((s,b,i)=>s+b*w[i],0)}
+const mse=(f,pts)=>pts.length?pts.reduce((s,p)=>s+(f(p.x)-p.y)**2,0)/pts.length:NaN;
+const trainSet=()=>st.cheat?st.train.concat(st.test):st.train;
+function errs(){const out=[];for(let d=1;d<=MAXD;d++){const f=fit(trainSet(),d);out.push({d,tr:mse(f,st.train),te:mse(f,st.test)})}return out}
+const fmt=v=>!isFinite(v)?'–':v<.001?'<0.001':v>=100?v.toExponential(1):v.toFixed(3);
+
+const plot=$('plot'),M={l:34,r:12,t:12,b:26};let W=0,H=0;
+const sx=x=>M.l+(x-XR[0])/(XR[1]-XR[0])*(W-M.l-M.r),sy=y=>M.t+(YR[1]-y)/(YR[1]-YR[0])*(H-M.t-M.b);
+const ix=px=>XR[0]+(px-M.l)/(W-M.l-M.r)*(XR[1]-XR[0]),iy=py=>YR[1]-(py-M.t)/(H-M.t-M.b)*(YR[1]-YR[0]);
+function curve(f){let d='',pen=false;for(let i=0;i<=240;i++){const x=-1+2*i/240,y=f(x);
+  if(!isFinite(y)||y<YR[0]-1||y>YR[1]+1){pen=false;continue}const yy=Math.max(YR[0]-.3,Math.min(YR[1]+.3,y));d+=(pen?'L':'M')+sx(x).toFixed(1)+' '+sy(yy).toFixed(1);pen=true}return d}
+
+function drawPlot(){W=plot.clientWidth;H=plot.clientHeight;if(!W)return;const f=fit(trainSet(),st.deg),small=W<520;
+  const ticks=small?[-1,0,1]:[-1,-.5,0,.5,1],yt=small?[-2,0,2]:[-2,-1,0,1,2];
+  plot.innerHTML=`<defs><filter id="rough"><feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.2"/></filter>
+  <filter id="crayon"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="2.6"/></filter>
+  <clipPath id="cl"><rect x="${M.l}" y="${M.t}" width="${W-M.l-M.r}" height="${H-M.t-M.b}"/></clipPath></defs>
+  <g filter="url(#rough)" stroke="var(--line)" stroke-width="1.3" fill="none">${yt.map(v=>`<line x1="${M.l}" x2="${W-M.r}" y1="${sy(v)}" y2="${sy(v)}" ${v?'stroke-dasharray="2 6"':''}/>`).join('')}
+  <rect x="${M.l}" y="${M.t}" width="${W-M.l-M.r}" height="${H-M.t-M.b}" rx="6"/></g>
+  <g fill="var(--muted)" font-size="13" font-family="Caveat,cursive">${ticks.map(v=>`<text x="${sx(v)}" y="${H-6}" text-anchor="middle">${v}</text>`).join('')}${yt.map(v=>`<text x="${M.l-8}" y="${sy(v)+4}" text-anchor="end">${v}</text>`).join('')}</g>
+  <g clip-path="url(#cl)">
+  ${st.showTrue?`<path d="${curve(truth)}" stroke="var(--ochre)" stroke-width="2.4" stroke-dasharray="7 6" fill="none"/>`:''}
+  <path class="fit-path" d="${curve(f)}" stroke="var(--plum)" stroke-width="3" fill="none" stroke-linecap="round"/>
+  ${st.showTest?st.test.map(p=>`<circle cx="${sx(p.x)}" cy="${sy(p.y)}" r="4.5" fill="none" stroke="var(--rose)" stroke-width="1.8" opacity=".85"/>`).join(''):''}
+  <g filter="url(#crayon)">${st.train.map(p=>`<circle cx="${sx(p.x)}" cy="${sy(p.y)}" r="6.5" fill="var(--sage)" stroke="var(--paper)" stroke-width="1.2"/>`).join('')}</g></g>`}
+
+const errSvg=$('err');
+function drawErr(E){const w=errSvg.clientWidth,h=errSvg.clientHeight;if(!w)return;const m={l:34,r:10,t:10,b:22};
+  const vals=E.flatMap(e=>[e.tr,e.te]).filter(v=>isFinite(v)&&v>0);let lo=Math.log10(Math.max(1e-3,Math.min(...vals))),hi=Math.log10(Math.min(1e3,Math.max(...vals)));
+  lo=Math.floor(lo);hi=Math.max(lo+1,Math.ceil(hi));
+  const X=d=>m.l+(d-1)/(MAXD-1)*(w-m.l-m.r),Y=v=>{const l=Math.log10(Math.min(10**hi,Math.max(10**lo,v)));return m.t+(hi-l)/(hi-lo)*(h-m.t-m.b)};
+  const line=(k,c)=>`<path d="${E.map((e,i)=>(i?'L':'M')+X(e.d)+' '+Y(e[k])).join('')}" stroke="${c}" stroke-width="2.4" fill="none" stroke-linejoin="round"/>`+E.map(e=>`<circle cx="${X(e.d)}" cy="${Y(e[k])}" r="3" fill="${c}"/>`).join('');
+  const ys=[];for(let p=lo;p<=hi;p++)ys.push(p);
+  errSvg.innerHTML=`<g stroke="var(--line)">${ys.map(p=>`<line x1="${m.l}" x2="${w-m.r}" y1="${Y(10**p)}" y2="${Y(10**p)}" stroke-dasharray="2 5"/>`).join('')}</g>
+  <line x1="${X(st.deg)}" x2="${X(st.deg)}" y1="${m.t}" y2="${h-m.b}" stroke="var(--plum)" stroke-dasharray="4 4" stroke-width="1.5"/>
+  <g fill="var(--muted)" font-size="13" font-family="Caveat,cursive">${ys.map(p=>`<text x="${m.l-6}" y="${Y(10**p)+4}" text-anchor="end">${p>=0?10**p:10**p}</text>`).join('')}${[1,4,8,12].map(d=>`<text x="${X(d)}" y="${h-5}" text-anchor="middle">${d}</text>`).join('')}</g>
+  ${line('tr','var(--sage)')}${line('te','var(--rose)')}`}
+
+const names={down:'一直变小',u:'先变小，后变大',flat:'基本不变'};
+function insight(E){if(!st.guess)return;const te=E.map(e=>e.te),best=te.indexOf(Math.min(...te)),bd=best+1;
+  const pattern=te[MAXD-1]>1.5*te[best]&&bd<MAXD?'u':te[0]>1.3*te[best]?'down':'flat';
+  let s=`你猜的是“${names[st.guess]}”。在你眼前这组数据里，练习题误差从 ${fmt(E[0].tr)} 降到 ${fmt(E[MAXD-1].tr)}；考题误差在次数 <b>${bd}</b> 时最低（${fmt(te[best])}），到次数 12 时是 ${fmt(te[MAXD-1])}，整体更像“${names[pattern]}”。`;
+  s+=pattern===st.guess?' 和你的猜测一致。':' 和你的猜测不太一样，可以想想是哪里出乎意料。';
+  s+=' 试试减少练习题、加大噪声，或者换一组数据，形状会怎么变？';
+  if(st.cheat)s+=' <b>注意：你现在开着“偷看考题”，以上考题误差不可信。</b>';
+  $('insight').innerHTML=s}
+
+function render(){drawPlot();const E=errs(),cur=E[st.deg-1];$('trE').textContent=fmt(cur.tr);$('teE').textContent=fmt(cur.te);
+  drawErr(E);insight(E);$('warn').classList.toggle('on',st.cheat);$('lgTrue').hidden=!st.showTrue}
+
+const bind=(id,key,out,parse)=>{$(id).addEventListener('input',e=>{st[key]=parse(e.target.value);$(out).textContent=e.target.value;if(key==='noise'||key==='n')gen();render()})};
+bind('deg','deg','degOut',Number);bind('noise','noise','noiseOut',Number);bind('cnt','n','cntOut',Number);
+for(const k of['showTrue','showTest','cheat'])$(k).addEventListener('change',e=>{st[k]=e.target.checked;render()});
+$('resample').onclick=()=>{seed=(seed*7919+13)%1000003;gen();render()};
+$('undo').onclick=()=>{if(hist.length){st.train=hist.pop();render()}};
+document.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{st.guess=b.dataset.g;document.querySelectorAll('[data-g]').forEach(x=>x.setAttribute('aria-pressed',x===b));$('errBox').classList.remove('locked');render()});
+
+let drag=null;
+const pos=e=>{const r=plot.getBoundingClientRect();return{px:e.clientX-r.left,py:e.clientY-r.top}};
+const inside=({px,py})=>px>=M.l&&px<=W-M.r&&py>=M.t&&py<=H-M.b;
+plot.addEventListener('pointerdown',e=>{const p=pos(e);let best=-1,bd=16;
+  st.train.forEach((q,i)=>{const d=Math.hypot(sx(q.x)-p.px,sy(q.y)-p.py);if(d<bd){bd=d;best=i}});
+  hist.push(st.train.map(q=>({...q})));if(hist.length>50)hist.shift();
+  if(best<0){if(!inside(p)){hist.pop();return}st.train.push({x:Math.max(-1,Math.min(1,ix(p.px))),y:iy(p.py)});best=st.train.length-1}
+  drag=best;plot.setPointerCapture(e.pointerId);render()});
+plot.addEventListener('pointermove',e=>{if(drag===null)return;const p=pos(e);st.train[drag]={x:ix(p.px),y:iy(p.py)};render()});
+const end=e=>{if(drag===null)return;const p=pos(e);if(!inside(p)&&st.train.length>2)st.train.splice(drag,1);
+  else st.train[drag].x=Math.max(-1.05,Math.min(1.05,st.train[drag].x));drag=null;$('cntOut').textContent=st.train.length;render()};
+plot.addEventListener('pointerup',end);plot.addEventListener('pointercancel',end);
+
+
+gen();const ro=new ResizeObserver(render);ro.observe($('plotBox'));ro.observe($('errBox'));
+}
+</script>
+</body>
+</html>

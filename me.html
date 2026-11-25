@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-style="d">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qirious</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700&family=Noto+Sans+SC:wght@400;500&family=Nunito:wght@400;500;600;700&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 个人主页，像手帐的扉页署名
+   IDEA: 一张作者名片 + 作品陈列
+   PICTURE: 水彩晕染的头像与名字
+   COLOUR and TYPE: 与全站一致
+   LAYOUT: 名片 → 我的实验 → 名字的由来 → 接下来想弄懂的 */
+:root{color-scheme:light dark;
+--bg:light-dark(#F7F3EC,#1F1D1B);--paper:light-dark(#FFFDF9,#292724);--ink:light-dark(#2F2C28,#ECE5D8);
+--muted:light-dark(#716B62,#A9A195);--line:light-dark(#E3DCD0,#403C37);
+--sage:light-dark(#86A887,#9DB29C);--rose:light-dark(#C98B80,#D49C94);--plum:light-dark(#7E72A8,#AFA5D0);--ochre:light-dark(#D2A65C,#D7B97E);--teal:light-dark(#74A3A0,#9DBAB8)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:15.5px/1.7 "Noto Sans SC",system-ui,sans-serif;overflow-x:clip}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.28;mix-blend-mode:multiply;
+background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .25 0 0 0 0 .22 0 0 0 0 .18 0 0 0 .45 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) body::before{mix-blend-mode:screen;opacity:.12}}
+:root[data-theme=dark] body::before{mix-blend-mode:screen;opacity:.12}
+.band{padding:clamp(26px,4vw,52px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+h1{font:700 clamp(28px,3.6vw,42px)/1.12 "Noto Serif SC",serif;margin:0 0 .3em;text-wrap:balance}
+h2{font:700 clamp(20px,2vw,24px)/1.25 "Noto Serif SC",serif;margin:0 0 .6em}
+.lede{max-width:60ch;font-size:15px;color:var(--muted);margin:0}
+.nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:clamp(20px,3vw,36px)}
+.word{font:700 26px/1 "Nunito",sans-serif;letter-spacing:.01em;color:var(--ink);text-decoration:none}.word b{color:var(--rose);font-weight:800}
+.who{text-decoration:none;min-height:36px;display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);padding:3px 12px 3px 3px;border-radius:999px;background:var(--paper);border:.5px solid var(--line)}
+.who i{font:normal 600 13px "Noto Serif SC",serif;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:light-dark(#CEC6E4,#5C5384);color:light-dark(#4A4070,#EEE9FA)}
+.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px 32px}
+.stats{display:flex;gap:22px}.stats div{font-size:13px;color:var(--muted)}.stats b{display:block;font:700 34px/1 "Caveat",cursive;color:var(--ink)}
+.nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:clamp(20px,3vw,36px)}
+.word{font:700 26px/1 "Nunito",sans-serif;letter-spacing:.01em;color:var(--ink);text-decoration:none}.word b{color:var(--rose);font-weight:800}
+.who{text-decoration:none;min-height:36px;display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);padding:3px 12px 3px 3px;border-radius:999px;background:var(--paper);border:.5px solid var(--line)}
+.who i{font:normal 600 13px "Noto Serif SC",serif;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:light-dark(#CEC6E4,#5C5384);color:light-dark(#4A4070,#EEE9FA)}
+.sheet{background:var(--paper);border-radius:10px;border:.5px solid var(--line);box-shadow:0 1px 2px rgba(90,70,50,.06)}
+.prof{display:grid;grid-template-columns:auto minmax(0,1fr);gap:22px 28px;align-items:center}
+@media(max-width:600px){.prof{grid-template-columns:minmax(0,1fr)}}
+.ava{position:relative;width:112px;height:112px}
+.ava svg{position:absolute;inset:-14px;width:140px;height:140px}
+.ava span{position:absolute;inset:0;display:grid;place-items:center;font:700 44px "Noto Serif SC",serif;color:var(--ink)}
+.handle{font:600 15px "Nunito",sans-serif;color:var(--muted)}
+.bio{max-width:58ch;margin:.4em 0 0}
+.draft{font-size:12.5px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:14px}
+.wk{display:flex;flex-direction:column;gap:6px;padding:16px;border-radius:10px;border:.5px solid var(--line);background:var(--paper);color:var(--ink);text-decoration:none;min-height:150px}
+.wk.plan{background:transparent;border-style:dashed}
+.wk:hover{border-color:var(--muted)}
+.wk .st{font-size:12.5px;color:var(--muted)}.wk b{font:600 16.5px/1.45 "Noto Serif SC",serif}
+.wk .en{font:500 14px "Nunito",sans-serif;color:var(--muted);margin-top:auto}
+.wk .dots{display:flex;gap:5px}.wk .dots i{width:9px;height:9px;border-radius:50%}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px}
+.pun{padding:18px}.pun .big{font:700 30px/1.2 "Nunito",sans-serif}.pun .big b{color:var(--rose)}
+.pun .zh{font:700 30px/1.2 "Noto Serif SC",serif}.pun p{margin:.5em 0 0;color:var(--muted);font-size:15px}
+.next{margin:0;padding-left:1.2em}.next li{margin-bottom:6px}
+.next a{color:var(--ink);text-underline-offset:3px}
+footer{color:var(--muted);font-size:14px}
+h2{font-weight:600;border-top:.5px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+<header class="band">
+  <div class="wrap">
+    <nav class="nav"><a class="word" href="index.html"><b>Qi</b>rious</a><a class="who" href="me.html" aria-current="page"><i>淇</i>淇思工坊</a></nav>
+    <div class="prof">
+      <div class="ava" aria-hidden="true"><svg viewBox="0 0 140 140"><defs><filter id="wc" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="3" seed="9"/><feDisplacementMap in="SourceGraphic" scale="16"/><feGaussianBlur stdDeviation="1.5"/></filter></defs><g filter="url(#wc)"><circle cx="64" cy="74" r="52" style="fill:light-dark(#C3B9DE,#5C5384)" opacity=".75"/><circle cx="86" cy="58" r="36" style="fill:light-dark(#DCD4EE,#7A70A6)" opacity=".7"/></g></svg><span>淇</span></div>
+      <div>
+        <div class="handle">Qirious 的主人</div>
+        <h1 style="margin:.1em 0 .1em">淇思工坊</h1>
+        <p class="bio">一个学数学和金融的学生。喜欢把弄不懂的问题拆开，做成可以亲手试一试的小实验，再把它们一个个连起来。</p>
+        <div class="draft">简介是草稿，之后换成你自己的话</div>
+      </div>
+    </div>
+    <div class="stats" id="stats" style="margin-top:22px"></div>
+  </div>
+</header>
+<main class="band" style="padding-top:0">
+  <div class="wrap">
+    <h2>我的实验</h2>
+    <div class="cards" id="cards"></div>
+  </div>
+</main>
+<section class="band" style="padding-top:0">
+  <div class="wrap">
+    <h2>名字的由来</h2>
+    <div class="two">
+      <div class="sheet pun"><div class="big"><b>Qi</b>rious</div><p>网站的名字。把 curious（好奇的）开头换成我名字里的“Qi”。</p></div>
+      <div class="sheet pun"><div class="zh">淇思工坊</div><p>我在这里的名字。“淇思”取“奇思妙想”的谐音；“工坊”是动手做东西的地方。</p></div>
+    </div>
+  </div>
+</section>
+<section class="band" style="padding-top:0">
+  <div class="wrap">
+    <h2>接下来想弄懂的</h2>
+    <ol class="next" id="next"></ol>
+  </div>
+</section>
+<footer class="band wrap" style="padding-top:0">Qirious · 淇思工坊</footer>
+<script src="pages.js"></script>
+<script>
+{
+const {TOPICS,PAGES}=window.QIRIOUS,$=id=>document.getElementById(id);
+const done=PAGES.filter(p=>p.status==='done'),plan=PAGES.filter(p=>p.status==='plan');
+$('stats').innerHTML=`<div><b>${done.length}</b>完成的实验</div><div><b>${plan.length}</b>计划中</div><div><b>${new Set(PAGES.flatMap(p=>p.topics)).size}</b>个主题</div>`;
+$('cards').innerHTML=[...done,...plan].map(p=>`<a class="wk ${p.status}" href="${p.url||'index.html#'+p.id}"><span class="st">${p.status==='done'?'已完成':'计划中'}</span><b>${p.q}</b><span class="dots">${p.topics.map(t=>`<i style="background:${TOPICS[t].c}" title="${TOPICS[t].name}"></i>`).join('')}</span><span class="en">${p.en}</span></a>`).join('');
+$('next').innerHTML=plan.map(p=>`<li><a href="index.html#${p.id}">${p.q}</a></li>`).join('');
+}
+</script>
+</body>
+</html>
