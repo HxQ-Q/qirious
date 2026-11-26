@@ -53,7 +53,7 @@ h2{font:700 clamp(20px,2vw,24px)/1.25 "Noto Serif SC",serif;margin:0 0 .6em}
 .wk:hover{border-color:var(--muted)}
 .wk .st{font-size:12.5px;color:var(--muted)}.wk b{font:600 16.5px/1.45 "Noto Serif SC",serif}
 .wk .en{font:500 14px "Nunito",sans-serif;color:var(--muted);margin-top:auto}
-.wk .dots{display:flex;gap:5px}.wk .dots i{width:9px;height:9px;border-radius:50%}
+.wk .sr{font-size:12.5px;color:var(--muted)}.wk .sr i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:0}
 .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px}
 .pun{padding:18px}.pun .big{font:700 30px/1.2 "Nunito",sans-serif}.pun .big b{color:var(--rose)}
 .pun .zh{font:700 30px/1.2 "Noto Serif SC",serif}.pun p{margin:.5em 0 0;color:var(--muted);font-size:15px}
@@ -103,10 +103,13 @@ h2{font-weight:600;border-top:.5px solid var(--line);padding-top:12px}
 <script src="pages.js"></script>
 <script>
 {
-const {TOPICS,PAGES}=window.QIRIOUS,$=id=>document.getElementById(id);
-const done=PAGES.filter(p=>p.status==='done'),plan=PAGES.filter(p=>p.status==='plan');
-$('stats').innerHTML=`<div><b>${done.length}</b>已完成</div><div><b>${plan.length}</b>计划中</div><div><b>${new Set(PAGES.flatMap(p=>p.topics)).size}</b>个主题</div>`;
-$('cards').innerHTML=[...done,...plan].map(p=>`<a class="wk ${p.status}" href="${p.url||'index.html#'+p.id}"><span class="st">${p.status==='done'?'已完成':'计划中'}</span><b>${p.q}</b><span class="dots">${p.topics.map(t=>`<i style="background:${TOPICS[t].c}" title="${TOPICS[t].name}"></i>`).join('')}</span><span class="en">${p.en}</span></a>`).join('');
+const {SERIES,PAGES,seriesOf}=window.QIRIOUS,$=id=>document.getElementById(id);
+// 先按专题、再按专题内的阅读顺序排列
+const rank=p=>SERIES.findIndex(s=>s.id===p.series)*1000+p.order;
+const all=[...PAGES].sort((a,b)=>rank(a)-rank(b));
+const done=all.filter(p=>p.status==='done'),plan=all.filter(p=>p.status==='plan');
+$('stats').innerHTML=`<div><b>${done.length}</b>已完成</div><div><b>${plan.length}</b>计划中</div><div><b>${SERIES.length}</b>个专题</div>`;
+$('cards').innerHTML=[...done,...plan].map(p=>{const s=seriesOf(p);return `<a class="wk ${p.status}" href="${p.url||'index.html#'+p.id}"><span class="st">${p.status==='done'?'已完成':'计划中'}</span><b>${p.q}</b><span class="sr"><i style="background:${s.color}"></i>${s.name}</span><span class="en">${p.en}</span></a>`}).join('');
 $('next').innerHTML=plan.map(p=>`<li><a href="index.html#${p.id}">${p.q}</a></li>`).join('');
 }
 </script>
