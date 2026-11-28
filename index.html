@@ -171,9 +171,10 @@ $('stats').innerHTML=`<div><b>${PAGES.filter(p=>p.status==='done').length}</b>�
 
 /* ════════ 知识地图 ════════
    布局：专题内按 next 连线算层级（横坐标 = 从专题起点走了几步），有分叉时上下展开。
-   列宽有下限（保证节点之间留得出箭头、标签不重叠）：横向空间够时各专题左右排开，跨专题连线从上方或下方绕行；
-   稍微不够时整张地图等比例缩小（文字不小于 12px）；再不够就改为上下排列，跨专题连线走纵向弧线。
-   分叉的上下顺序和跨专题连线的走法，在所有组合里选“最短、不交叉、不压住节点和文字”的一种。
+   列宽有下限（保证节点之间留得出箭头、标签不重叠）：横向空间够时各专题左右排开；
+   稍微不够时整张地图等比例缩小（文字不小于 12px）；再不够就改为上下排列。
+   跨专题连线是一段只轻微弯曲的平滑曲线，直接连两个节点；压到节点或文字时稍微加大弯曲来避开，不绕远路。
+   分叉的上下顺序和每条线的弯曲程度，在所有组合里选“不压节点和文字、弯曲最小、尽量不交叉”的一种。
    以后做“两层地图”时，专题层可以复用 seriesTree / place 的结果。 */
 const svg=$('map'),box=$('mapBox'),tip=$('tip');
 let L=null;
@@ -207,7 +208,7 @@ function place(trees,ord,M){
     pos[p.id]={...m,x:X,y:Y,ly:Y+m.ring+fs+3,ly0:Y+m.ring+4,ly1:Y+m.ring+fs+7}};
   let H;
   if(!stack){const n=trees.length,pad=14,gap=22,tot=trees.reduce((a,t)=>a+t.cols,0),used=tot*cw+n*2*pad+gap*(n-1);
-    const maxL=Math.max(...S.map(o=>o.n)),rh=118,span=(maxL-1)*rh,AR=34,top0=AR+74;
+    const maxL=Math.max(...S.map(o=>o.n)),rh=118,span=(maxL-1)*rh,AR=12,top0=AR+74;
     let x=(W-used)/2;
     trees.forEach((t,i)=>{const {slot,n:nL}=S[i];
       t.nodes.forEach(p=>put(p,x+pad+(t.depth[p.id]+.5)*cw,top0+(nL>1?slot[p.id]/(nL-1)*span:span/2)));
@@ -217,7 +218,12 @@ function place(trees,ord,M){
     trees.forEach((t,i)=>{const {slot,n:nL}=S[i],c=Math.max(cw,Math.min(150,(W-2*pad)/t.cols)),x0=(W-t.cols*c)/2,top=y+62;
       t.nodes.forEach(p=>put(p,x0+(t.depth[p.id]+.5)*c,top+slot[p.id]*rh));
       const bottom=top+(nL-1)*rh+maxRing+fs+16;areas.push({s:t.s,x0:x0-pad,x1:x0+t.cols*c+pad,ny:y+22,y0:y,y1:bottom});y=bottom+40});
-    H=y-40+6}
+    H=y-40+6;
+    // 上下排列时，跨专题连线从上面的专题往下走；把上端节点的标签挪到节点上方，曲线就能直接从节点下方出发，不必压字或绕路
+    const ti=id=>trees.findIndex(t=>t.s.id===byId[id].series);
+    for(const e of ME)if(e.cross){const id=ti(e.from.id)<ti(e.to.id)?e.from.id:e.to.id,q=pos[id],old={ly:q.ly,ly0:q.ly0,ly1:q.ly1};
+      Object.assign(q,{ly:q.y-q.ring-7,ly0:q.y-q.ring-fs-8,ly1:q.y-q.ring-4});
+      if(overlaps({pos}))Object.assign(q,old)}}  // 挪上去会和别的东西重叠就不挪
   // 专题区域：水彩晕染贴合节点；专题名在左上角
   for(const a of areas){const ps=MP.filter(p=>p.series===a.s.id).map(p=>pos[p.id]);
     const x0=Math.min(...ps.map(q=>q.x-Math.max(q.ring,q.lw/2)))-16,x1=Math.max(...ps.map(q=>q.x+Math.max(q.ring,q.lw/2)))+16;
@@ -234,12 +240,7 @@ function overlaps(G){const q=Object.values(G.pos);let n=0;
     if(Math.abs(a.x-b.x)<a.lw/2+b.ring+2&&b.y+b.ring>a.ly0-2&&b.y-b.ring<a.ly1+2)n++}
   return n}
 
-/* 路径工具：经过若干点的平滑曲线（Catmull-Rom → 三次贝塞尔） */
-// 控制柄的长度不超过本段长度的 1/3，避免在急转弯处冲过头、绕出一个小圈
-function smooth(pts){const segs=[],cap=(v,l)=>{const n=Math.hypot(v[0],v[1]);return n>l?[v[0]*l/n,v[1]*l/n]:v};
-  for(let i=0;i<pts.length-1;i++){const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2,l=Math.hypot(p2[0]-p1[0],p2[1]-p1[1])/3;
-    const m1=cap([(p2[0]-p0[0])/6,(p2[1]-p0[1])/6],l),m2=cap([(p3[0]-p1[0])/6,(p3[1]-p1[1])/6],l);
-    segs.push([p1,[p1[0]+m1[0],p1[1]+m1[1]],[p2[0]-m2[0],p2[1]-m2[1]],p2])}return segs}
+/* 路径工具 */
 function sample(segs,n=12){const out=[];segs.forEach(([a,b,c,d],j)=>{for(let i=j?1:0;i<=n;i++){const t=i/n,u=1-t,k=[u*u*u,3*u*u*t,3*u*t*t,t*t*t];
   out.push([k[0]*a[0]+k[1]*b[0]+k[2]*c[0]+k[3]*d[0],k[0]*a[1]+k[1]*b[1]+k[2]*c[1]+k[3]*d[1]])}});return out}
 const att=(q,w,g=3)=>{const dx=w[0]-q.x,dy=w[1]-q.y,l=Math.hypot(dx,dy)||1;return[q.x+dx/l*(q.ring+g),q.y+dy/l*(q.ring+g)]};
@@ -254,22 +255,15 @@ function hits(pts,G,skip,ownLabelW=1,m=4){let c=0;const {pos,areas,W,H}=G;
       if(Math.abs(x-q.x)<q.lw/2+m&&y>q.ly0-m+1&&y<q.ly1+m-1)c+=skip.includes(id)?ownLabelW:1}
     for(const a of areas){const b=a.nbox;if(x>b.x0-4&&x<b.x1+4&&y>b.y0-4&&y<b.y1+4)c+=6}}return c}
 
-/* 跨专题连线的几种走法 */
-function crossPath(e,route,lv,G){const {pos,W,H,stack,areas}=G;
-  if(!stack){const [A,B]=[pos[e.from.id],pos[e.to.id]].sort((p,q)=>p.x-q.x);
-    // up / down：从上方或下方绕；带 T 的是“贴近节点再转弯”的版本，避开专题名
-    const d=route.endsWith('T')?22:Math.min(80,Math.max(28,(B.x-A.x)*.2));
-    if(route.startsWith('up')){const y=10+lv*9,wA=[A.x+d,y],wB=[B.x-d,y];
-      return smooth([att(A,wA),wA,wB,att(B,wB)])}
-    const y=H-10-lv*9,cA=[A.x+A.lw/2+8,A.ly0],wA=[A.x+A.lw/2+26,y],wB=[B.x-B.lw/2-26,y],cB=[B.x-B.lw/2-8,B.ly0];
-    return smooth([att(A,cA),cA,wA,wB,cB,att(B,cB)])}
-  const ai=id=>areas.findIndex(a=>a.s.id===byId[id].series);
-  const [U,D,aU]=ai(e.from.id)<ai(e.to.id)?[pos[e.from.id],pos[e.to.id],areas[ai(e.from.id)]]:[pos[e.to.id],pos[e.from.id],areas[ai(e.to.id)]];
-  if(route==='direct'){const s=Math.sign(D.x-U.x)||1,cU=[U.x+s*(U.lw/2+8),U.ly0],pU=[U.x+s*(U.lw/2+16),U.ly1+12],wD=[D.x,D.y-D.ring-24];
-    return smooth([att(U,cU),cU,pU,wD,att(D,wD)])}
-  const g=route==='L'?-1:1,gx=g<0?6+lv*13:W-6-lv*13,cU=[U.x+g*(U.lw/2+8),U.ly0],pU=[U.x+g*(U.lw/2+18),aU.y1-8],
-    m1=[gx,aU.y1+16],m2=[gx,D.y-18],eD=[D.x+g*(D.ring+22),D.y];
-  return smooth([att(U,cU),cU,pU,m1,m2,eD,att(D,eD)])}
+/* 跨专题连线：从一个节点直接连到另一个节点的一段平滑曲线（三次贝塞尔，两个控制点在同一侧，只轻微弯曲）。
+   k 是弯曲程度（中点偏离直线的距离，正负表示弯向哪一侧）。返回所有候选及代价，代价 = 压到节点/文字的程度 + 弯曲程度。 */
+const BENDS=[0,12,-12,24,-24,36,-36,50,-50,66,-66,84,-84,104,-104,130,-130,160,-160];
+function crossCands(e,G){const a=G.pos[e.from.id],b=G.pos[e.to.id],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,nx=-dy/d,ny=dx/d;
+  // 控制点的形状 [t1,u,t2,v]：沿连线的位置和偏移比例。第一种是对称的弧；其余让曲线从节点侧面出发或到达，用来避开节点下方的标签
+  const SHAPES=[[1/3,1,2/3,1],[1/3,1.6,2/3,.4],[1/3,.4,2/3,1.6],[.08,1.5,2/3,1],[1/3,1,.92,1.5],[.08,1.4,.92,1.4]];
+  return BENDS.flatMap(k=>SHAPES.map(([t1,u,t2,v],j)=>{const h=k*4/3,c1=[a.x+dx*t1+nx*h*u,a.y+dy*t1+ny*h*u],c2=[a.x+dx*t2+nx*h*v,a.y+dy*t2+ny*h*v];
+    const s=att(a,c1),t=att(b,c2),segs=[[s,c1,c2,t]],P=sample(segs,90);
+    return{segs,P,cost:1000*hits(P,G,[e.from.id,e.to.id],1,G.stack?3:5)+Math.abs(k)*1.5+(j?12:0)+len(P)*.05}})).sort((p,q)=>p.cost-q.cost)}
 
 // 专题内连线：在几种弯曲程度里选一条最不碍事的二次曲线。
 // 起点越过终点（或剩下的线太短）时，不画这条候选；全都不行时画成没有箭头的线，绝不画反向箭头。
@@ -304,24 +298,18 @@ function optimize(trees,M){const stack=M.stack;
   const choices=[];trees.forEach((t,ti)=>{if(t.roots.length>1)choices.push({ti,key:'@'+t.s.id,list:t.roots});
     for(const id in t.kids)if(t.kids[id].length>1)choices.push({ti,key:id,list:t.kids[id]})});
   let combos=[[]];for(const c of choices){const ps=perms(c.list).slice(0,6);combos=combos.flatMap(cb=>ps.map(p=>[...cb,p]));if(combos.length>200){combos=[choices.map(c=>c.list)];break}}
-  const xe=ME.map((e,i)=>({e,i})).filter(o=>o.e.cross),routes=stack?['direct','L','R']:['up','down','upT','downT'],side=r=>stack?r:r.replace('T','');
-  let rcs=[[]];for(const _ of xe){rcs=rcs.flatMap(r=>routes.map(x=>[...r,x]));if(rcs.length>800){rcs=[xe.map(()=>routes[0])];break}}
+  const xe=ME.map((e,i)=>({e,i})).filter(o=>o.e.cross);
   let best=null;
   for(const cb of combos){const ord={};let pen=0;
     choices.forEach((c,j)=>{ord[c.key]=cb[j];if(cb[j].some((id,k)=>id!==c.list[k]))pen+=(trees.length-c.ti)*6});
     const G=place(trees,ord,M);
-    // 专题内连线的直线近似，用来惩罚和跨专题连线的交叉
-    const inner=ME.filter(e=>!e.cross).map(e=>[[G.pos[e.from.id].x,G.pos[e.from.id].y],[G.pos[e.to.id].x,G.pos[e.to.id].y]]);
-    for(const rc of rcs){
-      // 同一侧的弧线：跨度大的在外圈
-      const lv={};for(const r of new Set(routes.map(side))){xe.map((o,k)=>({k,span:Math.abs(G.pos[o.e.from.id][stack?'y':'x']-G.pos[o.e.to.id][stack?'y':'x'])})).filter(o=>side(rc[o.k])===r).sort((a,b)=>b.span-a.span).forEach((o,j)=>lv[o.k]=j)}
-      const paths=xe.map((o,k)=>crossPath(o.e,rc[k],lv[k],G)),pts=paths.map(s=>sample(s));
-      let cost=pen;
-      pts.forEach((P,k)=>{cost+=len(P)+80*hits(P,G,[xe[k].e.from.id,xe[k].e.to.id],1,stack?9:4);
-        for(const [a,b] of inner)for(let i=1;i<P.length-2;i++)if(segX(P[i],P[i+1],a,b))cost+=stack?150:40});
-      for(let a=0;a<pts.length;a++)for(let b=a+1;b<pts.length;b++){const ea=xe[a].e,eb=xe[b].e,share=[ea.from,ea.to].some(p=>p===eb.from||p===eb.to);
-        cost+=4000*crosses(pts[a],pts[b],share)+(!stack&&side(rc[a])===side(rc[b])?1500:0)}  // 宽屏：跨专题弧线尽量一上一下，不叠在同一侧
-      if(!best||cost<best.cost)best={cost,G,paths}}}
+    // 每条跨专题连线取代价最低的几种弯曲，组合起来再看交叉（允许交叉，只轻微惩罚）
+    const cands=xe.map(o=>crossCands(o.e,G).slice(0,4));
+    let pick=[[]];for(const c of cands){pick=pick.flatMap(p=>c.map(x=>[...p,x]));if(pick.length>256){pick=[cands.map(c=>c[0])];break}}
+    for(const pk of pick){let cost=pen+pk.reduce((a,x)=>a+x.cost,0);
+      for(let a=0;a<pk.length;a++)for(let b=a+1;b<pk.length;b++){const ea=xe[a].e,eb=xe[b].e,share=[ea.from,ea.to].some(p=>p===eb.from||p===eb.to);
+        cost+=60*Math.min(1,crosses(pk[a].P,pk[b].P,share))}
+      if(!best||cost<best.cost)best={cost,G,paths:pk.map(x=>x.segs)}}}
   const G=best.G;
   G.curves=ME.map(e=>{const r=e.cross?{segs:best.paths[xe.findIndex(o=>o.e===e)],arrow:false}:innerPath(e,G),s=r.segs,P=sample(s);
     return{d:'M'+f(s[0][0])+s.map(c=>'C'+f(c[1])+' '+f(c[2])+' '+f(c[3])).join(''),mid:P[Math.floor(P.length/2)],arrow:r.arrow}});
