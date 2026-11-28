@@ -11,8 +11,8 @@
 /* VOICE: 安静、个人、带点好奇心的个人学习网站 Qirious
    IDEA: 手帐的扉页：一张用彩铅连起来的知识星图，旁边是目录
    PICTURE: 手绘知识地图，节点是水彩晕染的圆点，连线是铅笔线
-   COLOUR and TYPE: 与内容页相同的莫兰迪纸色与三种主色，每个主题一种颜色；Noto Serif SC / Noto Sans SC / Caveat
-   LAYOUT: 标题 → 地图 + 选中卡片 → 主题筛选与目录 → 关于 */
+   COLOUR and TYPE: 与内容页相同的莫兰迪纸色，每个专题一种颜色；Noto Serif SC / Noto Sans SC / Caveat
+   LAYOUT: 标题 → 地图（按专题分区）+ 选中卡片 → 专题筛选与目录 → 关于 */
 :root{color-scheme:light dark;
 --bg:light-dark(#F7F3EC,#1F1D1B);--paper:light-dark(#FFFDF9,#292724);--ink:light-dark(#2F2C28,#ECE5D8);
 --muted:light-dark(#716B62,#A9A195);--line:light-dark(#E3DCD0,#403C37);
@@ -38,7 +38,11 @@ h2{font:700 clamp(20px,2vw,24px)/1.25 "Noto Serif SC",serif;margin:0 0 .6em}
 .mapgrid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:stretch;margin-top:22px}
 @media(max-width:900px){.mapgrid{grid-template-columns:minmax(0,1fr)}}
 .sheet{background:var(--paper);border-radius:18px;box-shadow:0 1px 0 var(--line),0 14px 30px -22px rgba(90,70,50,.28);padding:14px}
-.fig{position:relative;min-height:460px}.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.fig{position:relative;min-height:300px}.fig>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.hit{fill:none;stroke:transparent;stroke-width:16;pointer-events:stroke;cursor:pointer}.hit:focus{outline:none}
+.edge.hot{stroke-opacity:1;stroke-width:3.4px}
+.tip{position:absolute;z-index:2;max-width:260px;padding:8px 11px;background:var(--paper);border:.5px solid var(--line);border-radius:8px;box-shadow:0 6px 18px -8px rgba(60,45,30,.35);font-size:13.5px;line-height:1.55;pointer-events:none}
+.tip b{display:block;font-weight:500}.tip span{display:block;font-size:12px;color:var(--muted);margin-bottom:2px}
 .node{cursor:pointer}.node:focus{outline:none}.node:focus-visible .ring{stroke:var(--ink);stroke-width:2}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13.5px;color:var(--muted);padding:6px 6px 0}
 .legend svg{vertical-align:-3px;margin-right:6px}
@@ -50,7 +54,9 @@ h2{font:700 clamp(20px,2vw,24px)/1.25 "Noto Serif SC",serif;margin:0 0 .6em}
 .tags{display:flex;flex-wrap:wrap;gap:6px}
 .tag{font-size:13px;padding:2px 10px;border-radius:999px;background:var(--bg);white-space:nowrap}
 .tag i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}
-.links{font-size:14.5px}.links div{margin-top:4px}.links a{color:var(--ink);text-underline-offset:3px;cursor:pointer}
+.links{font-size:14.5px;display:flex;flex-direction:column;gap:8px}.links a{color:var(--ink);text-underline-offset:3px;cursor:pointer;text-decoration:underline;font-weight:500}
+.lk{font-size:12.5px;color:var(--muted)}.li{margin-top:3px;line-height:1.5}.li .why{display:block;font-size:13px;color:var(--muted)}
+.li .xs{font-size:11.5px;color:var(--rose);border:.5px solid currentColor;border-radius:4px;padding:0 5px;margin-left:6px;vertical-align:1px}
 .go{margin-top:auto;display:inline-flex;align-items:center;justify-content:center;min-height:46px;border-radius:999px;background:var(--ink);color:var(--paper);text-decoration:none;font-weight:500;padding:0 20px}
 .go[aria-disabled=true]{background:transparent;color:var(--muted);border:1.5px dashed var(--line);pointer-events:none}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}
@@ -60,7 +66,9 @@ h2{font:700 clamp(20px,2vw,24px)/1.25 "Noto Serif SC",serif;margin:0 0 .6em}
 .groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:26px 30px}
 .group h3{font:700 17px "Noto Serif SC",serif;margin:0 0 10px;display:flex;align-items:center;gap:10px}
 .group h3 i{width:14px;height:14px;border-radius:50%}
-.group h3 small{font:500 14px "Noto Sans SC";color:var(--muted)}
+.group h3 small{font:500 14px "Noto Sans SC";color:var(--muted);margin-left:auto}
+.group .desc{margin:0 0 12px;font-size:13.5px;color:var(--muted);line-height:1.6}
+.entry .ty{display:inline-block;font-size:12px;line-height:1.5;padding:0 6px;margin-right:6px;border:.5px solid var(--line);border-radius:4px;color:var(--muted)}
 .entry{display:block;padding:12px 14px;border-radius:14px;color:var(--ink);text-decoration:none;border:1.5px solid transparent;margin-bottom:8px;background:var(--paper)}
 .entry:hover{border-color:var(--line)}
 .entry.plan{background:transparent;border:1.5px dashed var(--line)}
@@ -110,14 +118,16 @@ footer{color:var(--muted);font-size:14px}
     </div>
     <div class="mapgrid">
       <div class="sheet">
-        <div class="fig" id="mapBox"><svg id="map" role="img" aria-label="知识地图：各页面及其联系"></svg></div>
+        <div class="fig" id="mapBox"><svg id="map" role="group" aria-label="知识地图：按专题分区的各页面及其联系"></svg><div class="tip" id="tip" role="tooltip" hidden></div></div>
         <div class="legend">
-          <span><svg width="16" height="16"><circle cx="8" cy="8" r="7" fill="var(--sage)" opacity=".7"/></svg>已完成</span>
+          <span><svg width="16" height="16"><circle cx="8" cy="8" r="7" fill="var(--muted)" opacity=".55"/></svg>已完成</span>
           <span><svg width="16" height="16"><circle cx="8" cy="8" r="6.5" fill="none" stroke="var(--muted)" stroke-dasharray="2 2"/></svg>计划中</span>
-          <span><svg width="26" height="10"><path d="M1 5h20" stroke="var(--muted)" stroke-width="1.6"/><path d="M18 1l5 4-5 4" fill="none" stroke="var(--muted)" stroke-width="1.6"/></svg>看完可以接着看</span>
+          <span><svg width="26" height="10"><path d="M1 5h20" stroke="var(--muted)" stroke-width="1.6"/><path d="M18 1l5 4-5 4" fill="none" stroke="var(--muted)" stroke-width="1.6"/></svg>接着看</span>
           <span><svg width="26" height="10"><path d="M1 5h24" stroke="var(--muted)" stroke-width="1.6" stroke-dasharray="3 4"/></svg>相关</span>
+          <span><svg width="28" height="10"><path d="M8 5h12" stroke="var(--muted)" stroke-width="1.6"/><path d="M6 1L1 5l5 4M22 1l5 4-5 4" fill="none" stroke="var(--muted)" stroke-width="1.6"/></svg>对比</span>
+          <span><svg width="26" height="10"><path d="M1 5h20" stroke="var(--rose)" stroke-width="2.8"/><path d="M18 1l5 4-5 4" fill="none" stroke="var(--rose)" stroke-width="2"/></svg>跨专题</span>
         </div>
-        <div class="figcap"><b>图 1</b>　知识地图。点任意节点查看详情；实线箭头表示“看完可以接着看”，虚线表示“相关”。</div>
+        <div class="figcap"><b>图 1</b>　知识地图。每个专题是一片区域，节点按建议的阅读顺序排开；点节点查看详情，把鼠标移到连线上（或点一下连线）可以看到两页为什么有关。</div>
       </div>
       <aside class="sheet card" id="card" aria-live="polite"></aside>
     </div>
@@ -127,7 +137,7 @@ footer{color:var(--muted);font-size:14px}
 <main class="band" style="padding-top:0">
   <div class="wrap">
     <h2>目录</h2>
-    <div class="chips" id="chips" role="group" aria-label="按主题筛选"></div>
+    <div class="chips" id="chips" role="group" aria-label="按专题筛选"></div>
     <div class="groups" id="groups"></div>
   </div>
 </main>
@@ -140,65 +150,123 @@ footer{color:var(--muted);font-size:14px}
     </div>
   </div>
 </section>
-<footer class="band wrap" style="padding-top:0">Qirious · 2026 —　｜　原型阶段：标“计划中”的页面是举例，还没有做</footer>
+<footer class="band wrap" style="padding-top:0">Qirious · 2026 —</footer>
 
 <script src="pages.js"></script>
 <script>
 {
-const {TOPICS,PAGES}=window.QIRIOUS;
-const byId=Object.fromEntries(PAGES.map(p=>[p.id,p]));
+const {SERIES,TYPES,PAGES,EDGES,byId,seriesOf,linksOf}=window.QIRIOUS;
 const $=id=>document.getElementById(id);
-let sel=(location.hash.slice(1) in byId)?location.hash.slice(1):'overfit',topic='all';
-const linksOf=p=>({prev:PAGES.filter(o=>o.next.includes(p.id)),next:p.next.map(i=>byId[i]),rel:[...new Set([...p.related.map(i=>byId[i]),...PAGES.filter(o=>o.related.includes(p.id))])]});
+const KIND={next:'接着看',related:'相关',compare:'对比'},ARROW={next:'→',related:'—',compare:'↔'};
+const sorted=list=>[...list].sort((a,b)=>a.order-b.order);
+let sel=(location.hash.slice(1) in byId)?location.hash.slice(1):'overfit',ser='all',pinned=null;
 
-$('stats').innerHTML=`<div><b>${PAGES.filter(p=>p.status==='done').length}</b>已完成</div><div><b>${PAGES.filter(p=>p.status==='plan').length}</b>计划中</div><div><b>${Object.keys(TOPICS).length}</b>个主题</div>`;
+$('stats').innerHTML=`<div><b>${PAGES.filter(p=>p.status==='done').length}</b>已完成</div><div><b>${PAGES.filter(p=>p.status==='plan').length}</b>计划中</div><div><b>${SERIES.length}</b>个专题</div>`;
 
-const svg=$('map');
-function drawMap(){const W=svg.clientWidth,H=svg.clientHeight;if(!W)return;const sm=W<560,pad=sm?44:64;
-  const P=p=>[pad+p.x*(W-2*pad),pad*.8+p.y*(H-1.8*pad)];
-  const edge=(a,b,dash)=>{const[x1,y1]=P(a),[x2,y2]=P(b),ra=a.status==='done'?32:25,rb=b.status==='done'?32:25,d=Math.hypot(x2-x1,y2-y1),ux=(x2-x1)/d,uy=(y2-y1)/d;
-    const sx=x1+ux*ra,sy=y1+uy*ra,ex=x2-ux*(rb+6),ey=y2-uy*(rb+6),mx=(sx+ex)/2-uy*18,my=(sy+ey)/2+ux*18;
-    const on=sel===a.id||sel===b.id;
-    return `<path d="M${sx} ${sy} Q${mx} ${my} ${ex} ${ey}" fill="none" stroke="var(--${on?'ink':'muted'})" stroke-opacity="${on?.8:.5}" stroke-width="1.7" stroke-linecap="round" ${dash?'stroke-dasharray="3 6"':'marker-end="url(#ah)"'}/>`};
-  let edges='';const seen=new Set();
-  for(const p of PAGES){for(const n of p.next)edges+=edge(p,byId[n],false);
-    for(const r of p.related){const k=[p.id,r].sort().join();if(!seen.has(k)){seen.add(k);edges+=edge(p,byId[r],true)}}}
-  const nodes=PAGES.map(p=>{const[x,y]=P(p),r=p.status==='done'?32:25,dim=topic!=='all'&&!p.topics.includes(topic),c=TOPICS[p.topics[0]].c,c2=p.topics[1]?TOPICS[p.topics[1]].c:c;
-    const lx=x>W-90?'end':x<90?'start':'middle',tx=lx==='end'?x+r:lx==='start'?x-r:x;
-    return `<g class="node" tabindex="0" role="button" aria-label="${p.short}：${p.q}" data-id="${p.id}" opacity="${dim?.25:1}">
+/* ── 知识地图：按专题自动分区布局 ──
+   宽屏：各专题左右排开；窄屏：上下排开。岛内节点按 order 走蛇形路径。 */
+const svg=$('map'),box=$('mapBox'),tip=$('tip');
+let L=null; // 当前布局：{W,H,sm,pos,isl,curves}
+function layout(W){
+  const sm=W<560,minCell=sm?102:118,rowH=sm?106:124,head=sm?34:40,gap=sm?16:20,pad=sm?4:10;
+  const groups=SERIES.map(s=>({s,list:sorted(PAGES.filter(p=>p.series===s.id))})).filter(g=>g.list.length);
+  const pos={},isl=[];
+  const place=(g,x,y,w)=>{const n=g.list.length,cols=Math.max(1,Math.min(n,Math.floor((w-2*pad)/minCell))),rows=Math.ceil(n/cols);
+    return {g,x,y,w,cols,rows,h:head+rows*rowH}};
+  if(!sm){const avail=W-gap*(groups.length-1),tot=groups.reduce((a,g)=>a+g.list.length,0);
+    const mins=groups.map(g=>minCell*Math.min(2,g.list.length)+2*pad),rest=Math.max(0,avail-mins.reduce((a,b)=>a+b,0));
+    let x=0;groups.forEach((g,i)=>{const w=mins[i]+rest*g.list.length/tot;isl.push(place(g,x,0,w));x+=w+gap});
+    const h=Math.max(...isl.map(o=>o.h));isl.forEach(o=>o.h=h);
+  }else{let y=0;for(const g of groups){const o=place(g,0,y,W);isl.push(o);y+=o.h+gap}}
+  const H=sm?isl.at(-1).y+isl.at(-1).h:Math.max(440,isl[0].h);
+  if(!sm)isl.forEach(o=>o.h=H);
+  for(const o of isl){const cw=(o.w-2*pad)/o.cols,top=o.y+head+(o.h-head-o.rows*rowH)/2;
+    o.g.list.forEach((p,i)=>{const r=Math.floor(i/o.cols),c0=i%o.cols,c=r%2?o.cols-1-c0:c0,rad=p.status==='done'?(sm?25:30):(sm?18:22);
+      pos[p.id]={x:o.x+pad+cw*(c+.5),y:top+rowH*(r+.5)-12,r:rad}})}
+  const fs=sm?12.5:13.5;
+  // 标签所占的矩形（用来让连线绕开）
+  const boxes=PAGES.map(p=>{const q=pos[p.id],w=[...p.short].reduce((a,ch)=>a+(ch.charCodeAt(0)>255?fs:fs*.6),0);return{id:p.id,x0:q.x-w/2-3,x1:q.x+w/2+3,y0:q.y+q.r+8,y1:q.y+q.r+26}});
+  // 每条连线：在若干弯曲程度中，选一条离其他节点和标签最远的二次曲线
+  const curves=EDGES.map(e=>{const a=pos[e.from.id],b=pos[e.to.id],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,nx=-dy/d,ny=dx/d,mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+    let best=null;
+    for(const k of [18,-18,0,40,-40,70,-70,100,-100,140,-140,180,-180]){const cx=mx+nx*k,cy=my+ny*k;let cost=Math.abs(k)*.02;
+      for(let t=.06;t<.95;t+=.03){const u=1-t,x=u*u*a.x+2*u*t*cx+t*t*b.x,y=u*u*a.y+2*u*t*cy+t*t*b.y;
+        if(x<4||x>W-4||y<4||y>H-4)cost+=4;
+        for(const p of PAGES){if(p.id===e.from.id||p.id===e.to.id)continue;const q=pos[p.id],dd=Math.hypot(x-q.x,y-q.y);if(dd<q.r+12)cost+=(q.r+12-dd)}
+        for(const bx of boxes){if(x>bx.x0&&x<bx.x1&&y>bx.y0&&y<bx.y1)cost+=bx.id===e.from.id||bx.id===e.to.id?1:6}}
+      if(!best||cost<best.cost)best={cost,cx,cy}}
+    const {cx,cy}=best,trim=(p,qx,qy,g)=>{const l=Math.hypot(qx-p.x,qy-p.y)||1;return[p.x+(qx-p.x)/l*(p.r+g),p.y+(qy-p.y)/l*(p.r+g)]};
+    const [sx,sy]=trim(a,cx,cy,e.kind==='compare'?8:5),[ex,ey]=trim(b,cx,cy,e.kind==='related'?5:8);
+    return{d:`M${sx.toFixed(1)} ${sy.toFixed(1)} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`,mx:.25*sx+.5*cx+.25*ex,my:.25*sy+.5*cy+.25*ey}});
+  return{W,H,sm,pos,isl,curves,fs};
+}
+
+function drawMap(){const W=box.clientWidth;if(!W)return;
+  if(!L||L.W!==W){L=layout(W);box.style.height=L.H+'px'}
+  const {H,sm,pos,isl,curves,fs}=L,inSer=p=>ser==='all'||p.series===ser;
+  const marker=(id,c,w)=>`<marker id="${id}" viewBox="0 0 10 10" refX="6" refY="5" markerUnits="userSpaceOnUse" markerWidth="${w?13:10}" markerHeight="${w?13:10}" orient="auto-start-reverse"><path d="M1 1L8 5L1 9" fill="none" stroke="var(--${c})" stroke-width="${w?2:1.6}" stroke-linecap="round" stroke-linejoin="round"/></marker>`;
+  const islands=isl.map(o=>`<g opacity="${ser==='all'||ser===o.g.s.id?1:.35}"><rect x="${o.x+2}" y="${o.y+2}" width="${o.w-4}" height="${o.h-4}" rx="26" fill="${o.g.s.color}" opacity=".09" filter="url(#wc)"/>
+    <rect x="${o.x+14}" y="${o.y+15}" width="9" height="9" rx="2" fill="${o.g.s.color}"/><text x="${o.x+30}" y="${o.y+24}" font-family="Noto Serif SC" font-weight="600" font-size="${sm?13.5:14.5}" fill="var(--muted)">${o.g.s.name}</text></g>`).join('');
+  let edges='',hits='';
+  EDGES.forEach((e,i)=>{const c=curves[i],cross=e.from.series!==e.to.series,on=sel===e.from.id||sel===e.to.id,dim=!inSer(e.from)&&!inSer(e.to);
+    const col=cross?'rose':on?'ink':'muted',op=dim?.15:on?.95:cross?.8:.5,w=cross?2.8:on?1.9:1.6;
+    const mk=cross?'ahr':on?'ahi':'ahm',marks=e.kind==='next'?`marker-end="url(#${mk})"`:e.kind==='compare'?`marker-start="url(#${mk})" marker-end="url(#${mk})"`:'';
+    edges+=`<path class="edge" data-v="${i}" d="${c.d}" fill="none" stroke="var(--${col})" stroke-opacity="${op}" stroke-width="${w}" stroke-linecap="round" ${e.kind==='related'?`stroke-dasharray="${cross?'5 6':'3 6'}"`:''} ${marks}/>`;
+    hits+=`<path class="hit" data-e="${i}" d="${c.d}" tabindex="0" role="button" aria-label="${e.from.short}${ARROW[e.kind]}${e.to.short}（${KIND[e.kind]}）：${e.why}"/>`});
+  const nodes=PAGES.map(p=>{const {x,y,r}=pos[p.id],c=seriesOf(p).color,dim=!inSer(p);
+    return `<g class="node" tabindex="0" role="button" aria-label="${p.short}（${p.status==='done'?'已完成':'计划中'}）：${p.q}" data-id="${p.id}" opacity="${dim?.25:1}">
       <g class="blob" style="transform-origin:${x}px ${y}px">
-      ${p.status==='done'?`<g filter="url(#wc)"><circle cx="${x-6}" cy="${y+3}" r="${r}" fill="${c}" opacity=".6"/><circle cx="${x+7}" cy="${y-4}" r="${r*.8}" fill="${c2}" opacity=".5"/></g>`
-        :`<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" opacity=".3" filter="url(#wc)"/>`}
+      ${p.status==='done'?`<g filter="url(#wc)"><circle cx="${x-5}" cy="${y+3}" r="${r}" fill="${c}" opacity=".65"/><circle cx="${x+6}" cy="${y-4}" r="${r*.75}" fill="${c}" opacity=".45"/></g>`
+        :`<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" opacity=".28" filter="url(#wc)"/>`}
       <circle class="ring" cx="${x}" cy="${y}" r="${r+4}" fill="none" stroke="${sel===p.id?'var(--ink)':p.status==='done'?'none':'var(--muted)'}" stroke-width="1.4" ${p.status==='done'||sel===p.id?'':'stroke-dasharray="2 4"'} filter="url(#rough)"/></g>
-      <text x="${tx}" y="${y+r+24}" text-anchor="${lx}" font-family="Noto Sans SC" font-size="${sm?12.5:13.5}" font-weight="500" fill="var(--ink)">${p.short}</text></g>`}).join('');
+      <text x="${x}" y="${y+r+22}" text-anchor="middle" font-family="Noto Sans SC" font-size="${fs}" font-weight="500" fill="var(--ink)">${p.short}</text></g>`}).join('');
+  svg.setAttribute('viewBox',`0 0 ${L.W} ${H}`);
   svg.innerHTML=`<defs><filter id="wc" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="3" seed="4"/><feDisplacementMap in="SourceGraphic" scale="12"/><feGaussianBlur stdDeviation="1.3"/></filter>
     <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" seed="2"/><feDisplacementMap in="SourceGraphic" scale="2.5"/></filter>
-    <marker id="ah" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1L8 5L1 9" fill="none" stroke="context-stroke" stroke-width="1.6" stroke-linecap="round"/></marker></defs>
-    <g filter="url(#rough)">${edges}</g>${nodes}`}
+    ${marker('ahm','muted')}${marker('ahi','ink')}${marker('ahr','rose',1)}</defs>
+    ${islands}<g filter="url(#rough)">${edges}</g><g>${hits}</g>${nodes}`;
+  if(pinned!==null)showTip(pinned);else hideTip()}
 
-function li(list){return list.map(o=>`<a data-go="${o.id}">${o.short}</a>`).join('、')}
-function drawCard(){const p=byId[sel],L=linksOf(p);
+/* 连线说明的小框 */
+function showTip(i,px,py){const e=EDGES[i],cross=e.from.series!==e.to.series,c=L.curves[i];
+  tip.innerHTML=`<b>${e.from.short} ${ARROW[e.kind]} ${e.to.short}</b><span>${KIND[e.kind]}${cross?' · 跨专题':''}</span>${e.why}`;
+  tip.hidden=false;const x=px??c.mx,y=py??c.my,tw=tip.offsetWidth,th=tip.offsetHeight;
+  tip.style.left=Math.max(4,Math.min(L.W-tw-4,x-tw/2))+'px';tip.style.top=(y-th-14<0?y+16:y-th-14)+'px';
+  svg.querySelectorAll('.edge.hot').forEach(n=>n.classList.remove('hot'));svg.querySelector(`.edge[data-v="${i}"]`)?.classList.add('hot')}
+function hideTip(){tip.hidden=true;svg.querySelectorAll('.edge.hot').forEach(n=>n.classList.remove('hot'))}
+const local=ev=>{const r=box.getBoundingClientRect();return[ev.clientX-r.left,ev.clientY-r.top]};
+svg.addEventListener('pointermove',ev=>{const h=ev.target.closest('.hit');if(h&&ev.pointerType==='mouse'){showTip(+h.dataset.e,...local(ev))}else if(pinned===null&&!svg.querySelector('.hit:focus'))hideTip();else if(pinned!==null&&!h)showTip(pinned)});
+svg.addEventListener('pointerleave',()=>{pinned===null?hideTip():showTip(pinned)});
+svg.addEventListener('focusin',ev=>{const h=ev.target.closest('.hit');if(h)showTip(+h.dataset.e)});
+svg.addEventListener('focusout',ev=>{if(ev.target.closest('.hit')&&pinned===null)hideTip()});
+
+/* ── 右侧选中卡片 ── */
+function drawCard(){const p=byId[sel],s=seriesOf(p),K=linksOf(p.id);
+  const grp=(label,items)=>items.length?`<div class="lg"><div class="lk">${label}</div>${items.map(({page:o,why})=>`<div class="li"><a data-go="${o.id}">${o.short}</a>${o.series!==p.series?`<span class="xs">${seriesOf(o).name}</span>`:''}<span class="why">${why}</span></div>`).join('')}</div>`:'';
+  const any=K.prev.length+K.next.length+K.rel.length+K.cmp.length;
   $('card').innerHTML=`<div class="st">${p.status==='done'?'已完成':'计划中 · 还没有做'}</div>
    <h3>${p.q}</h3><div class="concept">${p.concept}</div><div class="en">${p.en}</div><p>${p.blurb}</p>
-   <div class="tags">${p.topics.map(t=>`<span class="tag"><i style="background:${TOPICS[t].c}"></i>${TOPICS[t].name}</span>`).join('')}</div>
-   <div class="links">${L.prev.length?`<div>先看：${li(L.prev)}</div>`:''}${L.next.length?`<div>接着看：${li(L.next)}</div>`:''}${L.rel.length?`<div>相关：${li(L.rel)}</div>`:''}${!L.prev.length&&!L.next.length&&!L.rel.length?'<div style="color:var(--muted)">还没有和其他页面连上</div>':''}</div>
+   <div class="tags"><span class="tag"><i style="background:${s.color}"></i>${s.name}</span><span class="tag">${TYPES[p.type]}</span></div>
+   <div class="links">${grp('先看',K.prev)}${grp('接着看',K.next)}${grp('相关',K.rel)}${grp('对比',K.cmp)}${any?'':'<div style="color:var(--muted)">还没有和其他页面连上</div>'}</div>
    <a class="go" href="${p.url||'#'}" ${p.url?'':'aria-disabled="true"'}>${p.url?'去看看':'还在计划中'}</a>`}
 
-function drawDir(){const keys=topic==='all'?Object.keys(TOPICS):[topic];
-  $('chips').innerHTML=[['all','全部'],...Object.entries(TOPICS).map(([k,v])=>[k,v.name])].map(([k,n])=>`<button class="chip" data-t="${k}" aria-pressed="${topic===k}">${n}</button>`).join('');
-  $('groups').innerHTML=keys.map((k,gi)=>{const list=PAGES.filter(p=>p.topics.includes(k)).sort((a,b)=>(a.status>b.status)-(a.status<b.status));
-    return `<div class="group"><h3><i style="background:${TOPICS[k].c}"></i>${TOPICS[k].name}<small>${list.length} 页</small></h3>
-    ${list.length?list.map((p,i)=>`<a class="entry ${p.status}" href="${p.url||'#'+p.id}" data-pick="${p.id}"><span class="num">${Object.keys(TOPICS).indexOf(k)+1}.${i+1}</span><b>${p.q}</b><span class="lead"></span><span class="m2"><span class="cpt">${p.concept} · </span>${p.status==='done'?'已完成':'计划中'}</span></a>`).join(''):'<div class="empty">还没有页面</div>'}</div>`}).join('')}
+/* ── 目录：按专题分组，编号即 order ── */
+function drawDir(){const list=ser==='all'?SERIES:SERIES.filter(s=>s.id===ser);
+  $('chips').innerHTML=[['all','全部'],...SERIES.map(s=>[s.id,s.name])].map(([k,n])=>`<button class="chip" data-t="${k}" aria-pressed="${ser===k}">${n}</button>`).join('');
+  $('groups').innerHTML=list.map(s=>{const ps=sorted(PAGES.filter(p=>p.series===s.id)),done=ps.filter(p=>p.status==='done').length;
+    return `<div class="group"><h3><i style="background:${s.color}"></i>${s.name}<small>${done} / ${ps.length} 已完成</small></h3><p class="desc">${s.desc}</p>
+    ${ps.length?ps.map(p=>`<a class="entry ${p.status}" href="${p.url||'#'+p.id}" data-pick="${p.id}"><span class="num">${p.order}</span><b>${p.q}</b><span class="m2"><span class="ty">${TYPES[p.type]}</span>${p.concept} · ${p.status==='done'?'已完成':'计划中'}</span></a>`).join(''):'<div class="empty">还没有页面</div>'}</div>`}).join('')}
 
-function pick(id){sel=id;try{history.replaceState(null,'','#'+id)}catch(_){}drawMap();drawCard()}
+function pick(id){sel=id;pinned=null;try{history.replaceState(null,'','#'+id)}catch(_){}drawMap();drawCard()}
 function render(){drawMap();drawCard();drawDir()}
-svg.addEventListener('click',e=>{const g=e.target.closest('.node');if(g)pick(g.dataset.id)});
-svg.addEventListener('keydown',e=>{const g=e.target.closest('.node');if(g&&(e.key==='Enter'||e.key===' ')){e.preventDefault();pick(g.dataset.id)}});
+svg.addEventListener('click',e=>{const g=e.target.closest('.node'),h=e.target.closest('.hit');
+  if(g)pick(g.dataset.id);else if(h){const i=+h.dataset.e;pinned=pinned===i?null:i;pinned===null?hideTip():showTip(i)}else{pinned=null;hideTip()}});
+svg.addEventListener('keydown',e=>{if(e.key==='Escape'){pinned=null;hideTip();return}const g=e.target.closest('.node');if(g&&(e.key==='Enter'||e.key===' ')){e.preventDefault();pick(g.dataset.id)}});
 $('card').addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(a)pick(a.dataset.go)});
-$('chips').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(b){topic=b.dataset.t;render()}});
-$('groups').addEventListener('click',e=>{const a=e.target.closest('[data-pick]');if(a&&!byId[a.dataset.pick].url){e.preventDefault();pick(a.dataset.pick);$('mapBox').scrollIntoView({behavior:'smooth',block:'center'})}});
+$('chips').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(b){ser=b.dataset.t;render()}});
+$('groups').addEventListener('click',e=>{const a=e.target.closest('[data-pick]');if(a&&!byId[a.dataset.pick].url){e.preventDefault();pick(a.dataset.pick);box.scrollIntoView({behavior:'smooth',block:'center'})}});
 addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h in byId&&h!==sel)pick(h)});
-render();const ro=new ResizeObserver(drawMap);ro.observe($('mapBox'));
+render();new ResizeObserver(()=>drawMap()).observe(box);
 }
 </script>
 </body>

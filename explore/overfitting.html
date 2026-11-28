@@ -76,7 +76,9 @@ details{border-top:1.5px solid var(--line);padding:12px 0}
 summary{cursor:pointer;font-weight:500;min-height:32px}
 .math{font-family:"Noto Serif SC",serif;background:var(--bg);border-radius:12px;padding:10px 14px;overflow-x:auto;white-space:nowrap}
  .nextgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:14px}
-.nx{display:block;background:var(--paper);border:1.5px dashed var(--line);border-radius:16px;padding:14px 16px;color:var(--ink);text-decoration:none}.nx:hover{border-color:var(--muted)}
+.nx{display:block;background:var(--paper);border:1.5px solid var(--line);border-radius:16px;padding:14px 16px;color:var(--ink);text-decoration:none}.nx.plan{background:transparent;border-style:dashed}.nx:hover{border-color:var(--muted)}
+.nx small{display:block;margin-top:6px;padding-top:6px;border-top:.5px solid var(--line);font-size:13.5px;line-height:1.6;color:var(--muted)}
+.nextsec+.nextsec{margin-top:28px}
 .nx span{display:block;font-size:13px;color:var(--muted)}.nx em{display:block;font-style:normal;font:600 20px "Caveat",cursive;color:var(--plum)}
 footer{color:var(--muted);font-size:14px}
 @media(prefers-reduced-motion:no-preference){.fit-path{transition:d .25s}}
@@ -101,7 +103,7 @@ footer{color:var(--muted);font-size:14px}
   </svg>
   <div class="wrap">
     <nav class="nav"><a class="word" href="../index.html"><b>Qi</b>rious</a><a class="who" href="../me.html"><i>淇</i>淇思工坊</a></nav>
-    <div class="kicker">机器学习 · 统计</div>
+    <div class="kicker" id="kicker">机器学习基础</div>
     <h1>机器怎样从例子里学到规律？<br>又为什么会学“过头”？</h1>
     <p class="lede">下面的绿色点是机器能看到的“练习题”，玫瑰色空心点是它没见过的“考题”。机器用一条多项式曲线去贴合练习题，次数越高，曲线越灵活。</p>
     <div class="guess" role="group" aria-label="先猜一下">
@@ -176,13 +178,21 @@ footer{color:var(--muted);font-size:14px}
 </section>
 
 <section class="band" style="padding-top:0"><div class="wrap">
-    <h2>接着看</h2>
-    <div class="nextgrid">
-      <a class="nx" href="../index.html#cv"><span>计划中</span>看不到考题时，怎么选模型的复杂度？<em>交叉验证</em></a>
-      <a class="nx" href="../index.html#reg"><span>计划中</span>不降低次数，能不能让曲线老实一点？<em>正则化</em></a>
-    </div>
+    <div id="nextBox"><h2>接着看</h2><p><a href="../index.html">回到首页的知识地图</a></p></div>
   </div></section>
 <footer class="band wrap" style="padding-top:0">Qirious　｜　所有数据为程序随机生成，所有曲线和误差都是实时计算的。</footer>
+
+<script src="../pages.js"></script>
+<script>
+// 顶部专题名和底部“接着看 / 相关内容”都从 pages.js 生成
+{
+const {byId,seriesOf,linksOf}=window.QIRIOUS,ID='overfit',me=byId[ID],K=linksOf(ID);
+document.getElementById('kicker').textContent=seriesOf(me).name;
+const card=({page:o,why})=>`<a class="nx ${o.status}" href="${o.url?'../'+o.url:'../index.html#'+o.id}"><span>${o.status==='done'?'已完成':'计划中'}${o.series!==me.series?' · '+seriesOf(o).name:''}</span>${o.q}<em>${o.short}</em><small>${why}</small></a>`;
+const sec=(title,items)=>items.length?`<div class="nextsec"><h2>${title}</h2><div class="nextgrid">${items.map(card).join('')}</div></div>`:'';
+document.getElementById('nextBox').innerHTML=sec('先看',K.prev)+sec('接着看',K.next)+sec('相关内容',[...K.rel,...K.cmp]);
+}
+</script>
 
 <script>
 {
