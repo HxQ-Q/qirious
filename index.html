@@ -36,14 +36,17 @@ h2{font:700 clamp(20px,2vw,24px)/1.25 "Noto Serif SC",serif;margin:0 0 .6em}
 .top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px 32px}
 .stats{display:flex;gap:22px}.stats div{font-size:13px;color:var(--muted)}.stats b{display:block;font:700 34px/1 "Caveat",cursive;color:var(--ink)}
 .mapgrid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:stretch;margin-top:22px}
-@media(max-width:900px){.mapgrid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:1100px){.mapgrid{grid-template-columns:minmax(0,1fr)}}
 .sheet{background:var(--paper);border-radius:18px;box-shadow:0 1px 0 var(--line),0 14px 30px -22px rgba(90,70,50,.28);padding:14px}
-.fig{position:relative;min-height:300px}.fig>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.hit{fill:none;stroke:transparent;stroke-width:16;pointer-events:stroke;cursor:pointer}.hit:focus{outline:none}
+.fig{position:relative;min-height:300px;margin-top:4px}.fig>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.hit{fill:none;stroke:transparent;stroke-width:16;pointer-events:stroke;cursor:pointer}.hit.off{pointer-events:none}.hit:focus{outline:none}.hit:focus-visible{stroke:var(--plum);stroke-opacity:.25}
 .edge.hot{stroke-opacity:1;stroke-width:3.4px}
+.views{display:flex;flex-wrap:wrap;gap:8px;padding:2px 2px 6px}.views .chip{font-size:14.5px}
+.sname text{transition:none}a.sname{cursor:pointer}a.sname text{text-decoration:underline;text-underline-offset:3px}a.sname:focus-visible{outline:2px solid var(--plum)}
+.node .sel{display:none}.node.on .sel{display:inline}
 .tip{position:absolute;z-index:2;max-width:260px;padding:8px 11px;background:var(--paper);border:.5px solid var(--line);border-radius:8px;box-shadow:0 6px 18px -8px rgba(60,45,30,.35);font-size:13.5px;line-height:1.55;pointer-events:none}
 .tip b{display:block;font-weight:500}.tip span{display:block;font-size:12px;color:var(--muted);margin-bottom:2px}
-.node{cursor:pointer}.node:focus{outline:none}.node:focus-visible .ring{stroke:var(--ink);stroke-width:2}
+.node{cursor:pointer}.node:focus{outline:none}.node:focus-visible .sel{display:inline;stroke:var(--plum)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13.5px;color:var(--muted);padding:6px 6px 0}
 .legend svg{vertical-align:-3px;margin-right:6px}
 .card{display:flex;flex-direction:column;gap:10px}
@@ -51,18 +54,18 @@ h2{font:700 clamp(20px,2vw,24px)/1.25 "Noto Serif SC",serif;margin:0 0 .6em}
 .card h3{font:700 19px/1.4 "Noto Serif SC",serif;margin:0}
 .card .concept{font:700 26px/1 "Caveat",cursive;color:var(--plum)}
 .card p{margin:0;color:var(--muted);font-size:14.5px}
-.tags{display:flex;flex-wrap:wrap;gap:6px}
-.tag{font-size:13px;padding:2px 10px;border-radius:999px;background:var(--bg);white-space:nowrap}
-.tag i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}
-.links{font-size:14.5px;display:flex;flex-direction:column;gap:8px}.links a{color:var(--ink);text-underline-offset:3px;cursor:pointer;text-decoration:underline;font-weight:500}
-.lk{font-size:12.5px;color:var(--muted)}.li{margin-top:3px;line-height:1.5}.li .why{display:block;font-size:13px;color:var(--muted)}
-.li .xs{font-size:11.5px;color:var(--rose);border:.5px solid currentColor;border-radius:4px;padding:0 5px;margin-left:6px;vertical-align:1px}
-.go{margin-top:auto;display:inline-flex;align-items:center;justify-content:center;min-height:46px;border-radius:999px;background:var(--ink);color:var(--paper);text-decoration:none;font-weight:500;padding:0 20px}
+.card .q{color:var(--ink);font-size:15px}
+.card a[data-go],.card a[data-edge]{color:var(--ink);text-underline-offset:3px;cursor:pointer;text-decoration:underline;font-weight:500}
+.lks{list-style:none;margin:2px 0 0;padding:0;display:grid;gap:10px;font-size:14.5px;line-height:1.5}
+.lks li{border-left:2px solid var(--line);padding-left:10px}.lks li.x{border-left-color:var(--rose)}
+.lk{font-size:12.5px;color:var(--muted);margin-right:6px}.lks .why{display:block;font-size:13px;color:var(--muted)}
+.lks .xs{font-size:12px;color:var(--rose);border:.5px solid currentColor;border-radius:4px;padding:0 5px;margin-left:6px;vertical-align:1px;white-space:nowrap}
+.go{margin-top:4px;display:inline-flex;align-items:center;justify-content:center;min-height:46px;border-radius:999px;background:var(--ink);color:var(--paper);text-decoration:none;font-weight:500;padding:0 20px}
 .go[aria-disabled=true]{background:transparent;color:var(--muted);border:1.5px dashed var(--line);pointer-events:none}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}
 .chip{font:inherit;font-size:15px;min-height:44px;padding:6px 16px;border-radius:999px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
 .chip[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.chip:focus-visible,.entry:focus-visible,.go:focus-visible{outline:2px solid var(--plum);outline-offset:2px}
+.chip:focus-visible,.entry:focus-visible,.go:focus-visible,.card a:focus-visible{outline:2px solid var(--plum);outline-offset:2px}
 .groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:26px 30px}
 .group h3{font:700 17px "Noto Serif SC",serif;margin:0 0 10px;display:flex;align-items:center;gap:10px}
 .group h3 i{width:14px;height:14px;border-radius:50%}
@@ -79,7 +82,7 @@ h2{font:700 clamp(20px,2vw,24px)/1.25 "Noto Serif SC",serif;margin:0 0 .6em}
 .about ol{margin:0;padding-left:1.3em}.about li{margin-bottom:4px}
 .about p{margin:0;max-width:62ch}.about .sign{margin-top:10px;color:var(--muted);text-align:right;max-width:none}.about .pun{margin-top:14px;font-size:13.5px;color:var(--muted)}
 footer{color:var(--muted);font-size:14px}
-@media(prefers-reduced-motion:no-preference){.blob{transition:transform .3s}.node:hover .blob{transform:scale(1.08)}}
+@media(prefers-reduced-motion:no-preference){.blob{transition:transform .3s}.node:hover .blob{transform:scale(1.08)}.node,.edge{transition:opacity .25s}}
 .mast,.meta,.figcap,.en,.num,.lead{display:none}
 /* B 学术期刊风 */
 /* C 图录风 */
@@ -93,7 +96,6 @@ footer{color:var(--muted);font-size:14px}
 :root[data-style=d] .card h3{font-weight:600}
 :root[data-style=d] .concept{font:600 15px "Noto Sans SC";color:var(--plum)}
 :root[data-style=d] .en{display:block;font:500 15px "Nunito",sans-serif;color:var(--muted);margin-top:-6px}
-:root[data-style=d] .tag{border-radius:4px}
 :root[data-style=d] .go{border-radius:8px}
 :root[data-style=d] .chip{border-radius:8px}
 :root[data-style=d] .group h3{border-bottom:.5px solid var(--line);padding-bottom:6px}
@@ -118,16 +120,19 @@ footer{color:var(--muted);font-size:14px}
     </div>
     <div class="mapgrid">
       <div class="sheet">
+        <div class="views" id="views" role="group" aria-label="地图视图"><button class="chip" data-v="default" aria-pressed="true">默认</button><button class="chip" data-v="cross" aria-pressed="false">只看跨专题</button><button class="chip" data-v="all" aria-pressed="false">全部连线</button></div>
         <div class="fig" id="mapBox"><svg id="map" role="group" aria-label="知识地图：按专题分区的各页面及其联系"></svg><div class="tip" id="tip" role="tooltip" hidden></div></div>
         <div class="legend">
-          <span><svg width="16" height="16"><circle cx="8" cy="8" r="7" fill="var(--muted)" opacity=".55"/></svg>已完成</span>
-          <span><svg width="16" height="16"><circle cx="8" cy="8" r="6.5" fill="none" stroke="var(--muted)" stroke-dasharray="2 2"/></svg>计划中</span>
-          <span><svg width="26" height="10"><path d="M1 5h20" stroke="var(--muted)" stroke-width="1.6"/><path d="M18 1l5 4-5 4" fill="none" stroke="var(--muted)" stroke-width="1.6"/></svg>接着看</span>
-          <span><svg width="26" height="10"><path d="M1 5h24" stroke="var(--muted)" stroke-width="1.6" stroke-dasharray="3 4"/></svg>相关</span>
-          <span><svg width="28" height="10"><path d="M8 5h12" stroke="var(--muted)" stroke-width="1.6"/><path d="M6 1L1 5l5 4M22 1l5 4-5 4" fill="none" stroke="var(--muted)" stroke-width="1.6"/></svg>对比</span>
-          <span><svg width="26" height="10"><path d="M1 5h20" stroke="var(--rose)" stroke-width="2.8"/><path d="M18 1l5 4-5 4" fill="none" stroke="var(--rose)" stroke-width="2"/></svg>跨专题</span>
+          <span><svg width="18" height="18"><circle cx="9" cy="9" r="7.5" fill="var(--muted)" opacity=".55"/></svg>已完成</span>
+          <span><svg width="18" height="18"><circle cx="9" cy="9" r="6" fill="var(--muted)" opacity=".25"/><circle cx="9" cy="9" r="7.5" fill="none" stroke="var(--muted)" stroke-dasharray="2 2.5"/></svg>计划中</span>
+          <span><svg width="18" height="18"><circle cx="9" cy="9" r="7.5" fill="var(--muted)" opacity=".35"/></svg>概念页</span>
+          <span><svg width="18" height="18"><circle cx="9" cy="9" r="5.5" fill="var(--muted)" opacity=".35"/><circle cx="9" cy="9" r="8.2" fill="none" stroke="var(--muted)"/></svg>对比页</span>
+          <span><svg width="30" height="10"><path d="M1 5h22" stroke="var(--muted)" stroke-width="1.5"/><path d="M20 1l5 4-5 4" fill="none" stroke="var(--muted)" stroke-width="1.5"/></svg>主线</span>
+          <span><svg width="30" height="10"><path d="M2 5h26" stroke="var(--rose)" stroke-width="2.8" stroke-dasharray="8 6" stroke-linecap="round"/></svg>跨专题联系</span>
+          <span><svg width="30" height="10"><path d="M1 5h28" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="3 5"/></svg>专题内相关</span>
+          <span><svg width="30" height="10"><path d="M8 5h14" stroke="var(--muted)" stroke-width="1.5"/><path d="M6 1L1 5l5 4M24 1l5 4-5 4" fill="none" stroke="var(--muted)" stroke-width="1.5"/></svg>专题内对比</span>
         </div>
-        <div class="figcap"><b>图 1</b>　知识地图。每个专题是一片区域，节点按建议的阅读顺序排开；点节点查看详情，把鼠标移到连线上（或点一下连线）可以看到两页为什么有关。</div>
+        <div class="figcap"><b>图 1</b>　知识地图。每个专题是一片区域，节点按建议的阅读顺序从左往右排开；灰玫瑰色的虚线弧是跨专题的联系。点节点查看它和谁有关，把鼠标移到连线上（或点一下连线）可以看到两页为什么有关，点空白处恢复。</div>
       </div>
       <aside class="sheet card" id="card" aria-live="polite"></aside>
     </div>
@@ -155,100 +160,246 @@ footer{color:var(--muted);font-size:14px}
 <script src="pages.js"></script>
 <script>
 {
-const {SERIES,TYPES,PAGES,EDGES,byId,seriesOf,linksOf}=window.QIRIOUS;
+const {SERIES,TYPES,PAGES,MAP_PAGES:MP,MAP_EDGES:ME,byId,seriesOf,onMap,overviewOf}=window.QIRIOUS;
 const $=id=>document.getElementById(id);
-const KIND={next:'接着看',related:'相关',compare:'对比'},ARROW={next:'→',related:'—',compare:'↔'};
+const KIND={next:'接着看',related:'相关',compare:'对比'};
 const sorted=list=>[...list].sort((a,b)=>a.order-b.order);
-let sel=(location.hash.slice(1) in byId)?location.hash.slice(1):'overfit',ser='all',pinned=null;
+const h0=location.hash.slice(1);
+let view='default',focus=(h0 in byId&&onMap(byId[h0]))?{n:h0}:null,ser='all';
 
 $('stats').innerHTML=`<div><b>${PAGES.filter(p=>p.status==='done').length}</b>已完成</div><div><b>${PAGES.filter(p=>p.status==='plan').length}</b>计划中</div><div><b>${SERIES.length}</b>个专题</div>`;
 
-/* ── 知识地图：按专题自动分区布局 ──
-   宽屏：各专题左右排开；窄屏：上下排开。岛内节点按 order 走蛇形路径。 */
+/* ════════ 知识地图 ════════
+   布局：专题内按 next 连线算层级（横坐标 = 从专题起点走了几步），有分叉时上下展开。
+   列宽有下限（保证节点之间留得出箭头、标签不重叠）：横向空间够时各专题左右排开，跨专题连线从上方或下方绕行；
+   稍微不够时整张地图等比例缩小（文字不小于 12px）；再不够就改为上下排列，跨专题连线走纵向弧线。
+   分叉的上下顺序和跨专题连线的走法，在所有组合里选“最短、不交叉、不压住节点和文字”的一种。
+   以后做“两层地图”时，专题层可以复用 seriesTree / place 的结果。 */
 const svg=$('map'),box=$('mapBox'),tip=$('tip');
-let L=null; // 当前布局：{W,H,sm,pos,isl,curves}
-function layout(W){
-  const sm=W<560,minCell=sm?102:118,rowH=sm?106:124,head=sm?34:40,gap=sm?16:20,pad=sm?4:10;
-  const groups=SERIES.map(s=>({s,list:sorted(PAGES.filter(p=>p.series===s.id))})).filter(g=>g.list.length);
-  const pos={},isl=[];
-  const place=(g,x,y,w)=>{const n=g.list.length,cols=Math.max(1,Math.min(n,Math.floor((w-2*pad)/minCell))),rows=Math.ceil(n/cols);
-    return {g,x,y,w,cols,rows,h:head+rows*rowH}};
-  if(!sm){const avail=W-gap*(groups.length-1),tot=groups.reduce((a,g)=>a+g.list.length,0);
-    const mins=groups.map(g=>minCell*Math.min(2,g.list.length)+2*pad),rest=Math.max(0,avail-mins.reduce((a,b)=>a+b,0));
-    let x=0;groups.forEach((g,i)=>{const w=mins[i]+rest*g.list.length/tot;isl.push(place(g,x,0,w));x+=w+gap});
-    const h=Math.max(...isl.map(o=>o.h));isl.forEach(o=>o.h=h);
-  }else{let y=0;for(const g of groups){const o=place(g,0,y,W);isl.push(o);y+=o.h+gap}}
-  const H=sm?isl.at(-1).y+isl.at(-1).h:Math.max(440,isl[0].h);
-  if(!sm)isl.forEach(o=>o.h=H);
-  for(const o of isl){const cw=(o.w-2*pad)/o.cols,top=o.y+head+(o.h-head-o.rows*rowH)/2;
-    o.g.list.forEach((p,i)=>{const r=Math.floor(i/o.cols),c0=i%o.cols,c=r%2?o.cols-1-c0:c0,rad=p.status==='done'?(sm?25:30):(sm?18:22);
-      pos[p.id]={x:o.x+pad+cw*(c+.5),y:top+rowH*(r+.5)-12,r:rad}})}
-  const fs=sm?12.5:13.5;
-  // 标签所占的矩形（用来让连线绕开）
-  const boxes=PAGES.map(p=>{const q=pos[p.id],w=[...p.short].reduce((a,ch)=>a+(ch.charCodeAt(0)>255?fs:fs*.6),0);return{id:p.id,x0:q.x-w/2-3,x1:q.x+w/2+3,y0:q.y+q.r+8,y1:q.y+q.r+26}});
-  // 每条连线：在若干弯曲程度中，选一条离其他节点和标签最远的二次曲线
-  const curves=EDGES.map(e=>{const a=pos[e.from.id],b=pos[e.to.id],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,nx=-dy/d,ny=dx/d,mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
-    let best=null;
-    for(const k of [18,-18,0,40,-40,70,-70,100,-100,140,-140,180,-180]){const cx=mx+nx*k,cy=my+ny*k;let cost=Math.abs(k)*.02;
-      for(let t=.06;t<.95;t+=.03){const u=1-t,x=u*u*a.x+2*u*t*cx+t*t*b.x,y=u*u*a.y+2*u*t*cy+t*t*b.y;
-        if(x<4||x>W-4||y<4||y>H-4)cost+=4;
-        for(const p of PAGES){if(p.id===e.from.id||p.id===e.to.id)continue;const q=pos[p.id],dd=Math.hypot(x-q.x,y-q.y);if(dd<q.r+12)cost+=(q.r+12-dd)}
-        for(const bx of boxes){if(x>bx.x0&&x<bx.x1&&y>bx.y0&&y<bx.y1)cost+=bx.id===e.from.id||bx.id===e.to.id?1:6}}
-      if(!best||cost<best.cost)best={cost,cx,cy}}
-    const {cx,cy}=best,trim=(p,qx,qy,g)=>{const l=Math.hypot(qx-p.x,qy-p.y)||1;return[p.x+(qx-p.x)/l*(p.r+g),p.y+(qy-p.y)/l*(p.r+g)]};
-    const [sx,sy]=trim(a,cx,cy,e.kind==='compare'?8:5),[ex,ey]=trim(b,cx,cy,e.kind==='related'?5:8);
-    return{d:`M${sx.toFixed(1)} ${sy.toFixed(1)} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`,mx:.25*sx+.5*cx+.25*ex,my:.25*sy+.5*cy+.25*ey}});
-  return{W,H,sm,pos,isl,curves,fs};
+let L=null;
+const ctx=document.createElement('canvas').getContext('2d');
+const SANS='500 %px "Noto Sans SC",system-ui,sans-serif',SERIF='600 %px "Noto Serif SC",serif';
+const textW=(s,fs,font=SANS)=>{ctx.font=font.replace('%',fs);return ctx.measureText(s).width};
+const jit=id=>([...id].reduce((a,c)=>a*31+c.charCodeAt(0),7)%9-4)*1.4; // 手绘感：上下稍微错落
+const f=p=>p[0].toFixed(1)+' '+p[1].toFixed(1);
+
+// 一个专题的结构：层级、树形的父子关系（用来决定上下位置）
+function seriesTree(s){
+  const nodes=sorted(MP.filter(p=>p.series===s.id)),ids=new Set(nodes.map(p=>p.id));
+  const nx=ME.filter(e=>e.kind==='next'&&!e.cross&&ids.has(e.from.id)&&ids.has(e.to.id));
+  const depth={};nodes.forEach(p=>depth[p.id]=0);
+  for(let k=0;k<nodes.length;k++)for(const e of nx)depth[e.to.id]=Math.min(nodes.length,Math.max(depth[e.to.id],depth[e.from.id]+1));
+  const parent={};for(const e of nx){const c=e.to.id;if(depth[e.from.id]<depth[c]&&(!(c in parent)||e.from.order<byId[parent[c]].order))parent[c]=e.from.id}
+  const kids={},roots=[];nodes.forEach(p=>kids[p.id]=[]);
+  nodes.forEach(p=>parent[p.id]?kids[parent[p.id]].push(p.id):roots.push(p.id));
+  return{s,nodes,depth,kids,roots,cols:Math.max(...nodes.map(p=>depth[p.id]))+1};
+}
+const perms=a=>a.length<2?[a]:a.flatMap((x,i)=>perms([...a.slice(0,i),...a.slice(i+1)]).map(r=>[x,...r]));
+function slotsOf(t,ord){const slot={};let n=0;const kidsOf=id=>ord[id]||t.kids[id];
+  const dfs=id=>{const k=kidsOf(id);if(!k.length)return slot[id]=n++;const ys=k.map(dfs);return slot[id]=(ys[0]+ys.at(-1))/2};
+  (ord['@'+t.s.id]||t.roots).forEach(dfs);return{slot,n:Math.max(n,1)}}
+
+// 给定上下顺序和尺寸，算出所有节点和专题区域的位置
+function place(trees,ord,M){
+  const {fs,stack,Wn:W,maxRing,cw}=M,pos={},areas=[];
+  const S=trees.map(t=>slotsOf(t,ord));
+  const put=(p,x,y)=>{const m=M[p.id],o=p.pos||{},X=x+(o.dx||0),Y=y+jit(p.id)+(o.dy||0);
+    pos[p.id]={...m,x:X,y:Y,ly:Y+m.ring+fs+3,ly0:Y+m.ring+4,ly1:Y+m.ring+fs+7}};
+  let H;
+  if(!stack){const n=trees.length,pad=14,gap=22,tot=trees.reduce((a,t)=>a+t.cols,0),used=tot*cw+n*2*pad+gap*(n-1);
+    const maxL=Math.max(...S.map(o=>o.n)),rh=118,span=(maxL-1)*rh,AR=34,top0=AR+74;
+    let x=(W-used)/2;
+    trees.forEach((t,i)=>{const {slot,n:nL}=S[i];
+      t.nodes.forEach(p=>put(p,x+pad+(t.depth[p.id]+.5)*cw,top0+(nL>1?slot[p.id]/(nL-1)*span:span/2)));
+      areas.push({s:t.s,x0:x,x1:x+t.cols*cw+2*pad,ny:AR+22});x+=t.cols*cw+2*pad+gap});
+    H=top0+span+maxRing+fs+16+AR;
+  }else{const pad=M.pad,rh=M.small?100:112;let y=6;
+    trees.forEach((t,i)=>{const {slot,n:nL}=S[i],c=Math.max(cw,Math.min(150,(W-2*pad)/t.cols)),x0=(W-t.cols*c)/2,top=y+62;
+      t.nodes.forEach(p=>put(p,x0+(t.depth[p.id]+.5)*c,top+slot[p.id]*rh));
+      const bottom=top+(nL-1)*rh+maxRing+fs+16;areas.push({s:t.s,x0:x0-pad,x1:x0+t.cols*c+pad,ny:y+22,y0:y,y1:bottom});y=bottom+40});
+    H=y-40+6}
+  // 专题区域：水彩晕染贴合节点；专题名在左上角
+  for(const a of areas){const ps=MP.filter(p=>p.series===a.s.id).map(p=>pos[p.id]);
+    const x0=Math.min(...ps.map(q=>q.x-Math.max(q.ring,q.lw/2)))-16,x1=Math.max(...ps.map(q=>q.x+Math.max(q.ring,q.lw/2)))+16;
+    const ov=overviewOf(a.s.id),label=a.s.name+(ov?' · 导览 →':''),nfs=M.small?13.5:14.5;
+    Object.assign(a,{wx0:x0,wx1:x1,wy0:a.ny-24,wy1:Math.max(...ps.map(q=>q.ly1))+12,nx:x0+12,label,ov,nfs,
+      nbox:{x0:x0+8,x1:x0+12+16+textW(label,nfs,SERIF)+4,y0:a.ny-nfs-2,y1:a.ny+5}})}
+  return{W,H,stack,fs,pos,areas};
 }
 
-function drawMap(){const W=box.clientWidth;if(!W)return;
-  if(!L||L.W!==W){L=layout(W);box.style.height=L.H+'px'}
-  const {H,sm,pos,isl,curves,fs}=L,inSer=p=>ser==='all'||p.series===ser;
-  const marker=(id,c,w)=>`<marker id="${id}" viewBox="0 0 10 10" refX="6" refY="5" markerUnits="userSpaceOnUse" markerWidth="${w?13:10}" markerHeight="${w?13:10}" orient="auto-start-reverse"><path d="M1 1L8 5L1 9" fill="none" stroke="var(--${c})" stroke-width="${w?2:1.6}" stroke-linecap="round" stroke-linejoin="round"/></marker>`;
-  const islands=isl.map(o=>`<g opacity="${ser==='all'||ser===o.g.s.id?1:.35}"><rect x="${o.x+2}" y="${o.y+2}" width="${o.w-4}" height="${o.h-4}" rx="26" fill="${o.g.s.color}" opacity=".09" filter="url(#wc)"/>
-    <rect x="${o.x+14}" y="${o.y+15}" width="9" height="9" rx="2" fill="${o.g.s.color}"/><text x="${o.x+30}" y="${o.y+24}" font-family="Noto Serif SC" font-weight="600" font-size="${sm?13.5:14.5}" fill="var(--muted)">${o.g.s.name}</text></g>`).join('');
-  let edges='',hits='';
-  EDGES.forEach((e,i)=>{const c=curves[i],cross=e.from.series!==e.to.series,on=sel===e.from.id||sel===e.to.id,dim=!inSer(e.from)&&!inSer(e.to);
-    const col=cross?'rose':on?'ink':'muted',op=dim?.15:on?.95:cross?.8:.5,w=cross?2.8:on?1.9:1.6;
-    const mk=cross?'ahr':on?'ahi':'ahm',marks=e.kind==='next'?`marker-end="url(#${mk})"`:e.kind==='compare'?`marker-start="url(#${mk})" marker-end="url(#${mk})"`:'';
-    edges+=`<path class="edge" data-v="${i}" d="${c.d}" fill="none" stroke="var(--${col})" stroke-opacity="${op}" stroke-width="${w}" stroke-linecap="round" ${e.kind==='related'?`stroke-dasharray="${cross?'5 6':'3 6'}"`:''} ${marks}/>`;
-    hits+=`<path class="hit" data-e="${i}" d="${c.d}" tabindex="0" role="button" aria-label="${e.from.short}${ARROW[e.kind]}${e.to.short}（${KIND[e.kind]}）：${e.why}"/>`});
-  const nodes=PAGES.map(p=>{const {x,y,r}=pos[p.id],c=seriesOf(p).color,dim=!inSer(p);
-    return `<g class="node" tabindex="0" role="button" aria-label="${p.short}（${p.status==='done'?'已完成':'计划中'}）：${p.q}" data-id="${p.id}" opacity="${dim?.25:1}">
+// 标签之间、标签和其他节点之间有没有重叠
+function overlaps(G){const q=Object.values(G.pos);let n=0;
+  for(let i=0;i<q.length;i++)for(let j=0;j<q.length;j++){if(i===j)continue;const a=q[i],b=q[j];
+    if(i<j&&Math.abs(a.x-b.x)<(a.lw+b.lw)/2+6&&a.ly0<b.ly1+2&&b.ly0<a.ly1+2)n++;
+    if(Math.abs(a.x-b.x)<a.lw/2+b.ring+2&&b.y+b.ring>a.ly0-2&&b.y-b.ring<a.ly1+2)n++}
+  return n}
+
+/* 路径工具：经过若干点的平滑曲线（Catmull-Rom → 三次贝塞尔） */
+// 控制柄的长度不超过本段长度的 1/3，避免在急转弯处冲过头、绕出一个小圈
+function smooth(pts){const segs=[],cap=(v,l)=>{const n=Math.hypot(v[0],v[1]);return n>l?[v[0]*l/n,v[1]*l/n]:v};
+  for(let i=0;i<pts.length-1;i++){const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2,l=Math.hypot(p2[0]-p1[0],p2[1]-p1[1])/3;
+    const m1=cap([(p2[0]-p0[0])/6,(p2[1]-p0[1])/6],l),m2=cap([(p3[0]-p1[0])/6,(p3[1]-p1[1])/6],l);
+    segs.push([p1,[p1[0]+m1[0],p1[1]+m1[1]],[p2[0]-m2[0],p2[1]-m2[1]],p2])}return segs}
+function sample(segs,n=12){const out=[];segs.forEach(([a,b,c,d],j)=>{for(let i=j?1:0;i<=n;i++){const t=i/n,u=1-t,k=[u*u*u,3*u*u*t,3*u*t*t,t*t*t];
+  out.push([k[0]*a[0]+k[1]*b[0]+k[2]*c[0]+k[3]*d[0],k[0]*a[1]+k[1]*b[1]+k[2]*c[1]+k[3]*d[1]])}});return out}
+const att=(q,w,g=3)=>{const dx=w[0]-q.x,dy=w[1]-q.y,l=Math.hypot(dx,dy)||1;return[q.x+dx/l*(q.ring+g),q.y+dy/l*(q.ring+g)]};
+const len=pts=>pts.reduce((a,p,i)=>i?a+Math.hypot(p[0]-pts[i-1][0],p[1]-pts[i-1][1]):0,0);
+const segX=(a,b,c,d)=>{const o=(p,q,r)=>Math.sign((q[0]-p[0])*(r[1]-p[1])-(q[1]-p[1])*(r[0]-p[0]));return o(a,b,c)*o(a,b,d)<0&&o(c,d,a)*o(c,d,b)<0};
+// 两条采样线交叉了几次；near 为真时（两条线共用一个节点）忽略端点附近
+const crosses=(P,Q,near)=>{let n=0;const k=near?3:0;for(let i=k;i<P.length-1-k;i++)for(let j=k;j<Q.length-1-k;j++)if(segX(P[i],P[i+1],Q[j],Q[j+1]))n++;return n};
+// 一组采样点压到了多少障碍物（节点、标签、专题名、画布外）
+function hits(pts,G,skip,ownLabelW=1,m=4){let c=0;const {pos,areas,W,H}=G;
+  for(const [x,y] of pts){if(x<2||x>W-2||y<2||y>H-2)c+=1;
+    for(const id in pos){const q=pos[id];if(!skip.includes(id)&&Math.hypot(x-q.x,y-q.y)<q.ring+6)c+=1;
+      if(Math.abs(x-q.x)<q.lw/2+m&&y>q.ly0-m+1&&y<q.ly1+m-1)c+=skip.includes(id)?ownLabelW:1}
+    for(const a of areas){const b=a.nbox;if(x>b.x0-4&&x<b.x1+4&&y>b.y0-4&&y<b.y1+4)c+=6}}return c}
+
+/* 跨专题连线的几种走法 */
+function crossPath(e,route,lv,G){const {pos,W,H,stack,areas}=G;
+  if(!stack){const [A,B]=[pos[e.from.id],pos[e.to.id]].sort((p,q)=>p.x-q.x);
+    // up / down：从上方或下方绕；带 T 的是“贴近节点再转弯”的版本，避开专题名
+    const d=route.endsWith('T')?22:Math.min(80,Math.max(28,(B.x-A.x)*.2));
+    if(route.startsWith('up')){const y=10+lv*9,wA=[A.x+d,y],wB=[B.x-d,y];
+      return smooth([att(A,wA),wA,wB,att(B,wB)])}
+    const y=H-10-lv*9,cA=[A.x+A.lw/2+8,A.ly0],wA=[A.x+A.lw/2+26,y],wB=[B.x-B.lw/2-26,y],cB=[B.x-B.lw/2-8,B.ly0];
+    return smooth([att(A,cA),cA,wA,wB,cB,att(B,cB)])}
+  const ai=id=>areas.findIndex(a=>a.s.id===byId[id].series);
+  const [U,D,aU]=ai(e.from.id)<ai(e.to.id)?[pos[e.from.id],pos[e.to.id],areas[ai(e.from.id)]]:[pos[e.to.id],pos[e.from.id],areas[ai(e.to.id)]];
+  if(route==='direct'){const s=Math.sign(D.x-U.x)||1,cU=[U.x+s*(U.lw/2+8),U.ly0],pU=[U.x+s*(U.lw/2+16),U.ly1+12],wD=[D.x,D.y-D.ring-24];
+    return smooth([att(U,cU),cU,pU,wD,att(D,wD)])}
+  const g=route==='L'?-1:1,gx=g<0?6+lv*13:W-6-lv*13,cU=[U.x+g*(U.lw/2+8),U.ly0],pU=[U.x+g*(U.lw/2+18),aU.y1-8],
+    m1=[gx,aU.y1+16],m2=[gx,D.y-18],eD=[D.x+g*(D.ring+22),D.y];
+  return smooth([att(U,cU),cU,pU,m1,m2,eD,att(D,eD)])}
+
+// 专题内连线：在几种弯曲程度里选一条最不碍事的二次曲线。
+// 起点越过终点（或剩下的线太短）时，不画这条候选；全都不行时画成没有箭头的线，绝不画反向箭头。
+function innerPath(e,G){const a=G.pos[e.from.id],b=G.pos[e.to.id],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,nx=-dy/d,ny=dx/d,mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+  let best=null;
+  for(const k of [10,-10,0,24,-24,40,-40,60,-60,85,-85]){const c=[mx+nx*k,my+ny*k],tr=(p,g)=>att(p,c,g);
+    const s=tr(a,e.kind==='compare'?9:4),t=tr(b,e.kind==='related'?4:9),segs=[[s,[s[0]+(c[0]-s[0])*2/3,s[1]+(c[1]-s[1])*2/3],[t[0]+(c[0]-t[0])*2/3,t[1]+(c[1]-t[1])*2/3],t]];
+    const ok=(t[0]-s[0])*dx+(t[1]-s[1])*dy>14*d;
+    const cost=hits(sample(segs,24),G,[e.from.id,e.to.id],.4)*3+Math.abs(k)*.04+(ok?0:1e4);if(!best||cost<best.cost)best={cost,segs,ok}}
+  return{segs:best.segs,arrow:best.ok}}
+
+// 两种尺寸：常规 / 小（窄屏）。cwMin = 两个节点中心之间至少要隔多远，才留得出一段看得清的箭头
+// compact：中等宽度下仍左右排开，但节点小一号
+function sizing(small,extra,fs0,compact){const fs=fs0||(small?12.5:13.5),R=small?{concept:18,compare:15}:compact?{concept:21,compare:18}:{concept:25,compare:21},M={fs,small};
+  for(const p of MP){const r=R[p.type]||R.concept;M[p.id]={r,ring:r+(p.type==='compare'?8:4),lw:textW(p.short,fs)}}
+  M.maxRing=Math.max(...MP.map(p=>M[p.id].ring));M.cwMin=2*M.maxRing+(small?30:compact?36:44)+extra;return M}
+
+function layout(Wbox){
+  const trees=SERIES.map(seriesTree).filter(t=>t.nodes.length),n=trees.length,tot=trees.reduce((a,t)=>a+t.cols,0),maxCols=Math.max(...trees.map(t=>t.cols));
+  for(let extra=0;;extra+=6){
+    // 左右排开：先试常规尺寸，再试小一号的节点；不够时最多缩小到 89%（13.5px → 12px）
+    let M=null;for(const compact of [false,true]){const m=sizing(false,extra,0,compact),need=tot*m.cwMin+n*28+22*(n-1);
+      if(Wbox>=need*.89){M=m;M.stack=false;M.Wn=Math.max(Wbox,need);M.cw=Math.min(175,(M.Wn-n*28-22*(n-1))/tot);break}}
+    if(!M){M=sizing(Wbox<480,extra);M.stack=true;M.pad=M.small?8:12;M.Wn=Math.max(Wbox,maxCols*M.cwMin+2*M.pad);M.cw=M.cwMin;  // 上下排列
+      const k=Wbox/M.Wn;if(M.fs*k<12){const W0=M.Wn;M=sizing(M.small,extra,Math.min(12/k,M.fs*1.15));Object.assign(M,{stack:true,pad:M.small?8:12,Wn:W0,cw:M.cwMin})}}  // 很窄的手机上要缩小时，先放大字号，保证缩小后不小于 12px
+    const G=optimize(trees,M);
+    if(!overlaps(G)||extra>=60){G.scale=Wbox/M.Wn;G.Wbox=Wbox;return G}}
+}
+
+function optimize(trees,M){const stack=M.stack;
+  // 所有可以调换上下顺序的分叉
+  const choices=[];trees.forEach((t,ti)=>{if(t.roots.length>1)choices.push({ti,key:'@'+t.s.id,list:t.roots});
+    for(const id in t.kids)if(t.kids[id].length>1)choices.push({ti,key:id,list:t.kids[id]})});
+  let combos=[[]];for(const c of choices){const ps=perms(c.list).slice(0,6);combos=combos.flatMap(cb=>ps.map(p=>[...cb,p]));if(combos.length>200){combos=[choices.map(c=>c.list)];break}}
+  const xe=ME.map((e,i)=>({e,i})).filter(o=>o.e.cross),routes=stack?['direct','L','R']:['up','down','upT','downT'],side=r=>stack?r:r.replace('T','');
+  let rcs=[[]];for(const _ of xe){rcs=rcs.flatMap(r=>routes.map(x=>[...r,x]));if(rcs.length>800){rcs=[xe.map(()=>routes[0])];break}}
+  let best=null;
+  for(const cb of combos){const ord={};let pen=0;
+    choices.forEach((c,j)=>{ord[c.key]=cb[j];if(cb[j].some((id,k)=>id!==c.list[k]))pen+=(trees.length-c.ti)*6});
+    const G=place(trees,ord,M);
+    // 专题内连线的直线近似，用来惩罚和跨专题连线的交叉
+    const inner=ME.filter(e=>!e.cross).map(e=>[[G.pos[e.from.id].x,G.pos[e.from.id].y],[G.pos[e.to.id].x,G.pos[e.to.id].y]]);
+    for(const rc of rcs){
+      // 同一侧的弧线：跨度大的在外圈
+      const lv={};for(const r of new Set(routes.map(side))){xe.map((o,k)=>({k,span:Math.abs(G.pos[o.e.from.id][stack?'y':'x']-G.pos[o.e.to.id][stack?'y':'x'])})).filter(o=>side(rc[o.k])===r).sort((a,b)=>b.span-a.span).forEach((o,j)=>lv[o.k]=j)}
+      const paths=xe.map((o,k)=>crossPath(o.e,rc[k],lv[k],G)),pts=paths.map(s=>sample(s));
+      let cost=pen;
+      pts.forEach((P,k)=>{cost+=len(P)+80*hits(P,G,[xe[k].e.from.id,xe[k].e.to.id],1,stack?9:4);
+        for(const [a,b] of inner)for(let i=1;i<P.length-2;i++)if(segX(P[i],P[i+1],a,b))cost+=stack?150:40});
+      for(let a=0;a<pts.length;a++)for(let b=a+1;b<pts.length;b++){const ea=xe[a].e,eb=xe[b].e,share=[ea.from,ea.to].some(p=>p===eb.from||p===eb.to);
+        cost+=4000*crosses(pts[a],pts[b],share)+(!stack&&side(rc[a])===side(rc[b])?1500:0)}  // 宽屏：跨专题弧线尽量一上一下，不叠在同一侧
+      if(!best||cost<best.cost)best={cost,G,paths}}}
+  const G=best.G;
+  G.curves=ME.map(e=>{const r=e.cross?{segs:best.paths[xe.findIndex(o=>o.e===e)],arrow:false}:innerPath(e,G),s=r.segs,P=sample(s);
+    return{d:'M'+f(s[0][0])+s.map(c=>'C'+f(c[1])+' '+f(c[2])+' '+f(c[3])).join(''),mid:P[Math.floor(P.length/2)],arrow:r.arrow}});
+  return G;
+}
+
+function drawMap(force){const W=box.clientWidth;if(!W)return;
+  if(L&&L.Wbox===W&&!force)return;L=layout(W);box.style.height=(L.H*L.scale)+'px';
+  const {H,pos,areas,curves,fs}=L;
+  const islands=areas.map(a=>{const name=`<rect x="${a.nx}" y="${a.ny-10}" width="9" height="9" rx="2" fill="${a.s.color}"/><text x="${a.nx+16}" y="${a.ny}" font-family="Noto Serif SC" font-weight="600" font-size="${a.nfs}" fill="var(--ink)">${a.label}</text>`;
+    return `<rect x="${a.wx0}" y="${a.wy0}" width="${a.wx1-a.wx0}" height="${a.wy1-a.wy0}" rx="38" fill="${a.s.color}" opacity=".13" filter="url(#wash)"/>`+
+      (a.ov?`<a class="sname" href="${a.ov.url}" aria-label="进入${a.s.name}专题导览">${name}</a>`:`<g class="sname">${name}</g>`)}).join('');
+  let edges='',hitp='';
+  ME.forEach((e,i)=>{const c=curves[i];
+    const st=e.cross?'stroke="var(--rose)" stroke-width="2.8" stroke-dasharray="8 6"'
+      :'stroke="var(--muted)" stroke-width="1.5" stroke-opacity=".85"'+(e.kind==='related'?' stroke-dasharray="3 5"':'')+(!c.arrow?'':e.kind==='next'?' marker-end="url(#ah)"':e.kind==='compare'?' marker-start="url(#ah)" marker-end="url(#ah)"':'');
+    edges+=`<path class="edge" data-e="${i}" d="${c.d}" fill="none" stroke-linecap="round" ${st}/>`;
+    hitp+=`<path class="hit" data-e="${i}" d="${c.d}" tabindex="0" role="button" aria-label="${e.from.short}${e.kind==='next'?'→':'—'}${e.to.short}（${e.cross?'跨专题联系':KIND[e.kind]}）：${e.why}"/>`});
+  const nodes=MP.map(p=>{const {x,y,r,ring,ly}=pos[p.id],c=seriesOf(p).color,cmp=p.type==='compare';
+    return `<g class="node" tabindex="0" role="button" data-id="${p.id}" aria-label="${p.short}（${TYPES[p.type]}页，${p.status==='done'?'已完成':'计划中'}）：${p.q}">
+      <circle cx="${x}" cy="${y}" r="${ring+4}" fill="transparent"/>
       <g class="blob" style="transform-origin:${x}px ${y}px">
-      ${p.status==='done'?`<g filter="url(#wc)"><circle cx="${x-5}" cy="${y+3}" r="${r}" fill="${c}" opacity=".65"/><circle cx="${x+6}" cy="${y-4}" r="${r*.75}" fill="${c}" opacity=".45"/></g>`
-        :`<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" opacity=".28" filter="url(#wc)"/>`}
-      <circle class="ring" cx="${x}" cy="${y}" r="${r+4}" fill="none" stroke="${sel===p.id?'var(--ink)':p.status==='done'?'none':'var(--muted)'}" stroke-width="1.4" ${p.status==='done'||sel===p.id?'':'stroke-dasharray="2 4"'} filter="url(#rough)"/></g>
-      <text x="${x}" y="${y+r+22}" text-anchor="middle" font-family="Noto Sans SC" font-size="${fs}" font-weight="500" fill="var(--ink)">${p.short}</text></g>`}).join('');
+      ${p.status==='done'?`<g filter="url(#wc)"><circle cx="${x-3}" cy="${y+2}" r="${r}" fill="${c}" opacity=".7"/><circle cx="${x+4}" cy="${y-3}" r="${r*.72}" fill="${c}" opacity=".45"/></g>`
+        :`<circle cx="${x}" cy="${y}" r="${r-1}" fill="${c}" opacity=".3" filter="url(#wc)"/><circle cx="${x}" cy="${y}" r="${r+3}" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="2 4"/>`}
+      ${cmp?`<circle cx="${x}" cy="${y}" r="${r+8}" fill="none" stroke="var(--muted)" stroke-width="1" opacity=".75"/>`:''}</g>
+      <circle class="sel" cx="${x}" cy="${y}" r="${ring+(cmp?4:3)}" fill="none" stroke="var(--ink)" stroke-width="1.8"/>
+      <text x="${x}" y="${ly}" text-anchor="middle" font-family="Noto Sans SC" font-size="${fs}" font-weight="500" fill="var(--ink)">${p.short}</text></g>`}).join('');
   svg.setAttribute('viewBox',`0 0 ${L.W} ${H}`);
-  svg.innerHTML=`<defs><filter id="wc" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="3" seed="4"/><feDisplacementMap in="SourceGraphic" scale="12"/><feGaussianBlur stdDeviation="1.3"/></filter>
-    <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" seed="2"/><feDisplacementMap in="SourceGraphic" scale="2.5"/></filter>
-    ${marker('ahm','muted')}${marker('ahi','ink')}${marker('ahr','rose',1)}</defs>
-    ${islands}<g filter="url(#rough)">${edges}</g><g>${hits}</g>${nodes}`;
-  if(pinned!==null)showTip(pinned);else hideTip()}
+  svg.innerHTML=`<defs><filter id="wc" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="3" seed="4"/><feDisplacementMap in="SourceGraphic" scale="10"/><feGaussianBlur stdDeviation="1"/></filter>
+    <filter id="wash" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency=".012" numOctaves="3" seed="2"/><feDisplacementMap in="SourceGraphic" scale="34"/><feGaussianBlur stdDeviation="8"/></filter>
+    <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" seed="2"/><feDisplacementMap in="SourceGraphic" scale="2.2"/></filter>
+    <marker id="ah" viewBox="0 0 10 10" refX="6" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M1 1L8 5L1 9" fill="none" stroke="var(--muted)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+    ${islands}<g filter="url(#rough)">${edges}</g><g>${hitp}</g>${nodes}`;
+  apply()}
+
+/* 视图与聚焦：同一时间只让一层信息亮起来 */
+function apply(){const litE=new Set(),litN=new Set(),soft=new Set();
+  if(focus?.n){litN.add(focus.n);ME.forEach((e,i)=>{if(e.from.id===focus.n||e.to.id===focus.n){litE.add(i);litN.add(e.from.id);litN.add(e.to.id)}})}
+  else if(focus){const e=ME[focus.e];litE.add(focus.e);litN.add(e.from.id);litN.add(e.to.id)}
+  else if(view==='cross')ME.forEach((e,i)=>{if(e.cross){litE.add(i);litN.add(e.from.id);litN.add(e.to.id)}});
+  else{MP.forEach(p=>litN.add(p.id));ME.forEach((e,i)=>(view==='all'||e.cross||e.kind==='next'?litE:soft).add(i))}
+  svg.querySelectorAll('.edge').forEach(g=>{const i=+g.dataset.e;g.style.opacity=litE.has(i)?1:soft.has(i)?.15:.08});
+  svg.querySelectorAll('.hit').forEach(g=>{const i=+g.dataset.e,on=litE.has(i)||soft.has(i);g.classList.toggle('off',!on);on?g.setAttribute('tabindex','0'):g.removeAttribute('tabindex')});
+  svg.querySelectorAll('.node').forEach(g=>{g.style.opacity=litN.has(g.dataset.id)?1:.15;g.classList.toggle('on',focus?.n===g.dataset.id);g.setAttribute('aria-pressed',focus?.n===g.dataset.id)});
+  document.querySelectorAll('[data-v]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===view));
+  hideTip();drawCard()}
 
 /* 连线说明的小框 */
-function showTip(i,px,py){const e=EDGES[i],cross=e.from.series!==e.to.series,c=L.curves[i];
-  tip.innerHTML=`<b>${e.from.short} ${ARROW[e.kind]} ${e.to.short}</b><span>${KIND[e.kind]}${cross?' · 跨专题':''}</span>${e.why}`;
-  tip.hidden=false;const x=px??c.mx,y=py??c.my,tw=tip.offsetWidth,th=tip.offsetHeight;
-  tip.style.left=Math.max(4,Math.min(L.W-tw-4,x-tw/2))+'px';tip.style.top=(y-th-14<0?y+16:y-th-14)+'px';
-  svg.querySelectorAll('.edge.hot').forEach(n=>n.classList.remove('hot'));svg.querySelector(`.edge[data-v="${i}"]`)?.classList.add('hot')}
+function showTip(i,px,py){const e=ME[i],m=L.curves[i].mid;
+  tip.innerHTML=`<span>${e.cross?'跨专题联系':e.kind==='next'?'主线 · 接着看':'专题内'+KIND[e.kind]}</span><b>${e.from.short} ${e.kind==='next'?'→':'⇄'} ${e.to.short}</b>${e.why}`;
+  tip.hidden=false;const x=px??m[0]*L.scale,y=py??m[1]*L.scale,tw=tip.offsetWidth,th=tip.offsetHeight;
+  tip.style.left=Math.max(4,Math.min(L.Wbox-tw-4,x-tw/2))+'px';tip.style.top=(y-th-14<0?y+16:y-th-14)+'px';
+  svg.querySelectorAll('.edge.hot').forEach(n=>n.classList.remove('hot'));svg.querySelector(`.edge[data-e="${i}"]`)?.classList.add('hot')}
 function hideTip(){tip.hidden=true;svg.querySelectorAll('.edge.hot').forEach(n=>n.classList.remove('hot'))}
 const local=ev=>{const r=box.getBoundingClientRect();return[ev.clientX-r.left,ev.clientY-r.top]};
-svg.addEventListener('pointermove',ev=>{const h=ev.target.closest('.hit');if(h&&ev.pointerType==='mouse'){showTip(+h.dataset.e,...local(ev))}else if(pinned===null&&!svg.querySelector('.hit:focus'))hideTip();else if(pinned!==null&&!h)showTip(pinned)});
-svg.addEventListener('pointerleave',()=>{pinned===null?hideTip():showTip(pinned)});
+svg.addEventListener('pointermove',ev=>{const h=ev.target.closest('.hit:not(.off)');if(h&&ev.pointerType==='mouse')showTip(+h.dataset.e,...local(ev));else if(!svg.querySelector('.hit:focus'))hideTip()});
+svg.addEventListener('pointerleave',hideTip);
 svg.addEventListener('focusin',ev=>{const h=ev.target.closest('.hit');if(h)showTip(+h.dataset.e)});
-svg.addEventListener('focusout',ev=>{if(ev.target.closest('.hit')&&pinned===null)hideTip()});
+svg.addEventListener('focusout',ev=>{if(ev.target.closest('.hit'))hideTip()});
 
-/* ── 右侧选中卡片 ── */
-function drawCard(){const p=byId[sel],s=seriesOf(p),K=linksOf(p.id);
-  const grp=(label,items)=>items.length?`<div class="lg"><div class="lk">${label}</div>${items.map(({page:o,why})=>`<div class="li"><a data-go="${o.id}">${o.short}</a>${o.series!==p.series?`<span class="xs">${seriesOf(o).name}</span>`:''}<span class="why">${why}</span></div>`).join('')}</div>`:'';
-  const any=K.prev.length+K.next.length+K.rel.length+K.cmp.length;
-  $('card').innerHTML=`<div class="st">${p.status==='done'?'已完成':'计划中 · 还没有做'}</div>
-   <h3>${p.q}</h3><div class="concept">${p.concept}</div><div class="en">${p.en}</div><p>${p.blurb}</p>
-   <div class="tags"><span class="tag"><i style="background:${s.color}"></i>${s.name}</span><span class="tag">${TYPES[p.type]}</span></div>
-   <div class="links">${grp('先看',K.prev)}${grp('接着看',K.next)}${grp('相关',K.rel)}${grp('对比',K.cmp)}${any?'':'<div style="color:var(--muted)">还没有和其他页面连上</div>'}</div>
-   <a class="go" href="${p.url||'#'}" ${p.url?'':'aria-disabled="true"'}>${p.url?'去看看':'还在计划中'}</a>`}
+/* ── 右侧卡片 ── */
+function drawCard(){const c=$('card');
+  if(focus?.n){const p=byId[focus.n],s=seriesOf(p);
+    const ls=ME.map((e,i)=>({e,i})).filter(({e})=>e.from.id===p.id||e.to.id===p.id).sort((a,b)=>b.e.cross-a.e.cross);
+    const rel=e=>e.cross?'跨专题联系':e.kind==='next'?(e.from.id===p.id?'接着看':'先看'):KIND[e.kind];
+    c.innerHTML=`<div class="st">${s.name} · ${TYPES[p.type]} · ${p.status==='done'?'已完成':'计划中'}</div>
+     <h3>${p.short}</h3><p class="q">${p.q}</p><p>${p.blurb}</p>
+     ${ls.length?`<ul class="lks">${ls.map(({e})=>{const o=e.from.id===p.id?e.to:e.from;
+       return `<li class="${e.cross?'x':''}"><span class="lk">${rel(e)}</span><a data-go="${o.id}">${o.short}</a>${e.cross?`<span class="xs">${seriesOf(o).name}</span>`:''}<span class="why">${e.why}</span></li>`}).join('')}</ul>`
+       :'<p>还没有和其他页面连上。</p>'}
+     ${p.status==='done'&&p.url?`<a class="go" href="${p.url}">进入</a>`:''}`;return}
+  if(focus){const e=ME[focus.e];
+    c.innerHTML=`<div class="st">${e.cross?'跨专题联系':e.kind==='next'?'专题主线 · 接着看':'专题内'+KIND[e.kind]}</div>
+     <h3><a data-go="${e.from.id}">${e.from.short}</a> ${e.kind==='next'?'→':'⇄'} <a data-go="${e.to.id}">${e.to.short}</a></h3><p class="q">${e.why}</p>`;return}
+  const xs=ME.map((e,i)=>({e,i})).filter(o=>o.e.cross),ns=new Set(MP.map(p=>p.series)).size;
+  c.innerHTML=`<div class="st">${{default:'默认视图',cross:'只看跨专题',all:'全部连线'}[view]}</div>
+   <h3>${ns===2?'两个专题':'专题'}之间有 ${xs.length} 处联系</h3>
+   <ul class="lks">${xs.map(({e,i})=>`<li class="x"><a data-edge="${i}">${e.from.short} ⇄ ${e.to.short}</a><span class="why">${e.why}</span></li>`).join('')}</ul>`}
 
 /* ── 目录：按专题分组，编号即 order ── */
 function drawDir(){const list=ser==='all'?SERIES:SERIES.filter(s=>s.id===ser);
@@ -257,16 +408,20 @@ function drawDir(){const list=ser==='all'?SERIES:SERIES.filter(s=>s.id===ser);
     return `<div class="group"><h3><i style="background:${s.color}"></i>${s.name}<small>${done} / ${ps.length} 已完成</small></h3><p class="desc">${s.desc}</p>
     ${ps.length?ps.map(p=>`<a class="entry ${p.status}" href="${p.url||'#'+p.id}" data-pick="${p.id}"><span class="num">${p.order}</span><b>${p.q}</b><span class="m2"><span class="ty">${TYPES[p.type]}</span>${p.concept} · ${p.status==='done'?'已完成':'计划中'}</span></a>`).join(''):'<div class="empty">还没有页面</div>'}</div>`}).join('')}
 
-function pick(id){sel=id;pinned=null;try{history.replaceState(null,'','#'+id)}catch(_){}drawMap();drawCard()}
-function render(){drawMap();drawCard();drawDir()}
-svg.addEventListener('click',e=>{const g=e.target.closest('.node'),h=e.target.closest('.hit');
-  if(g)pick(g.dataset.id);else if(h){const i=+h.dataset.e;pinned=pinned===i?null:i;pinned===null?hideTip():showTip(i)}else{pinned=null;hideTip()}});
-svg.addEventListener('keydown',e=>{if(e.key==='Escape'){pinned=null;hideTip();return}const g=e.target.closest('.node');if(g&&(e.key==='Enter'||e.key===' ')){e.preventDefault();pick(g.dataset.id)}});
-$('card').addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(a)pick(a.dataset.go)});
-$('chips').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(b){ser=b.dataset.t;render()}});
-$('groups').addEventListener('click',e=>{const a=e.target.closest('[data-pick]');if(a&&!byId[a.dataset.pick].url){e.preventDefault();pick(a.dataset.pick);box.scrollIntoView({behavior:'smooth',block:'center'})}});
-addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h in byId&&h!==sel)pick(h)});
-render();new ResizeObserver(()=>drawMap()).observe(box);
+function setFocus(fc){focus=fc;try{history.replaceState(null,'',fc?.n?'#'+fc.n:location.pathname+location.search)}catch(_){}apply()}
+const pick=id=>setFocus(focus?.n===id?null:{n:id});
+svg.addEventListener('click',e=>{if(e.target.closest('.sname'))return;const g=e.target.closest('.node'),h=e.target.closest('.hit:not(.off)');
+  if(g)pick(g.dataset.id);else if(h){const i=+h.dataset.e;setFocus(focus?.e===i?null:{e:i})}else if(focus)setFocus(null)});
+svg.addEventListener('keydown',e=>{if(e.key==='Escape'){if(focus)setFocus(null);return}if(e.key!=='Enter'&&e.key!==' ')return;
+  const g=e.target.closest('.node'),h=e.target.closest('.hit');if(g||h)e.preventDefault();if(g)pick(g.dataset.id);else if(h)setFocus({e:+h.dataset.e})});
+$('views').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b){view=b.dataset.v;setFocus(null)}});
+$('card').addEventListener('click',e=>{const a=e.target.closest('[data-go]'),b=e.target.closest('[data-edge]');if(a)setFocus({n:a.dataset.go});else if(b)setFocus({e:+b.dataset.edge})});
+$('chips').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(b){ser=b.dataset.t;drawDir()}});
+$('groups').addEventListener('click',e=>{const a=e.target.closest('[data-pick]');if(!a||byId[a.dataset.pick].url)return;e.preventDefault();
+  if(onMap(byId[a.dataset.pick])){setFocus({n:a.dataset.pick});box.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'center'})}});
+addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h in byId&&onMap(byId[h])&&focus?.n!==h)setFocus({n:h})});
+drawMap();drawDir();new ResizeObserver(()=>drawMap()).observe(box);
+document.fonts?.ready.then(()=>drawMap(true)); // 字体加载后标签宽度会变，重新排一次
 }
 </script>
 </body>

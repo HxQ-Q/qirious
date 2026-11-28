@@ -114,22 +114,32 @@ window.QIRIOUS = (() => {
   // ── 以下是工具函数，加页面时不用改 ──
   const byId = Object.fromEntries(PAGES.map(p => [p.id, p]));
   const seriesOf = p => SERIES.find(s => s.id === p.series);
+  // 是否出现在知识地图上：可选字段 map，默认 true；专题导览默认 false
+  const onMap = p => p.map ?? (p.type !== 'overview');
 
-  // 所有连线（每条只出现一次），带上两端的页面
+  // 所有连线（每条只出现一次），带上两端的页面；cross 表示两端属于不同专题
   const EDGES = PAGES.flatMap(p => p.links.map(l => ({ from: p, to: byId[l.to], kind: l.kind, why: l.why })))
     .filter(e => {
       if (!e.to) { console.warn('[pages.js] 找不到连线目标：', e.from.id); return false; }
       return true;
-    });
+    })
+    .map(e => ({ ...e, cross: e.from.series !== e.to.series }));
 
-  // 一个页面的四组连线：先看 / 接着看 / 相关 / 对比，每项 {page, why}
+  // 知识地图上画的页面和连线（两端都在地图上的连线才画）
+  const MAP_PAGES = PAGES.filter(onMap);
+  const MAP_EDGES = EDGES.filter(e => onMap(e.from) && onMap(e.to));
+
+  // 专题的导览页（已完成的才返回），地图上的专题名据此决定是否可点
+  const overviewOf = sid => PAGES.find(p => p.series === sid && p.type === 'overview' && p.status === 'done' && p.url) || null;
+
+  // 一个页面的四组连线：先看 / 接着看 / 相关 / 对比，每项 {page, why, cross}（内容页底部用，包括导览）
   function linksOf(id) {
     const out = { prev: [], next: [], rel: [], cmp: [] };
     for (const e of EDGES) {
       const fromMe = e.from.id === id, toMe = e.to.id === id;
       if (!fromMe && !toMe) continue;
       const other = fromMe ? e.to : e.from;
-      const item = { page: other, why: e.why };
+      const item = { page: other, why: e.why, cross: e.cross };
       if (e.kind === 'next') (fromMe ? out.next : out.prev).push(item);
       else if (e.kind === 'related') out.rel.push(item);
       else if (e.kind === 'compare') out.cmp.push(item);
@@ -137,5 +147,5 @@ window.QIRIOUS = (() => {
     return out;
   }
 
-  return { SERIES, TYPES, PAGES, EDGES, byId, seriesOf, linksOf };
+  return { SERIES, TYPES, PAGES, EDGES, MAP_PAGES, MAP_EDGES, byId, seriesOf, onMap, overviewOf, linksOf };
 })();
